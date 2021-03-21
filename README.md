@@ -1,6 +1,7 @@
 # Treasure Hunter
 
 Web based 3D adventure game.
+Video Preview: https://www.youtube.com/watch?v=HQJ-Npu85DI
 
 # Dependencies
 
