@@ -1,0 +1,37 @@
+.Input {
+  padding: 0 15px;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  margin: 5px 0;
+  font-size: 1em;
+  height: 40px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+  &::placeholder {
+    color: #aaa;
+  }
+}
+
+.InputError {
+  color: #fff;
+  background: #f72424;
+  border-radius: 5px;
+  display: block;
+  padding: 5px 10px;
+  position: relative;
+  width: fit-content;
+  margin: auto;
+  font-size: 0.9em;
+
+  &::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background-color: #f72424;
+    position: absolute;
+    left: 50%;
+    top: -5px;
+    transform: rotate(45deg);
+  }
+}

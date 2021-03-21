@@ -1,0 +1,4 @@
+:root {
+  --slight-shadow: drop-shadow(0px 0px 10px rgba(var(--color-6-rgb), 0.1));
+  --medium-shadow: drop-shadow(0px 0px 10px rgba(var(--color-6-rgb), 0.5));
+}

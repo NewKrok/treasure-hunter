@@ -1,0 +1,4 @@
+export const StreamState = {
+  WAITING_FOR_PERMISSION: "WAITING_FOR_PERMISSION",
+  IN_PROGRESS: "IN_PROGRESS",
+};

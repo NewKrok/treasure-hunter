@@ -1,0 +1,23 @@
+.Wrapper {
+  width: 100%;
+  flex-grow: 1;
+
+  .Menu {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-gap: 10px;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .Entry {
+    padding: 20px 40px;
+    text-align: left;
+
+    .Info {
+      text-align: left;
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+  }
+}

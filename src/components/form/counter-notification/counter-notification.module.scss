@@ -1,0 +1,12 @@
+.Wrapper {
+  background-color: var(--color-9);
+  padding: 0 5px;
+  border-radius: 10px;
+  color: var(--color-8);
+  user-select: none;
+  pointer-events: none;
+}
+
+.Hidden {
+  display: none;
+}

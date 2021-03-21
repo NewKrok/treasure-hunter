@@ -1,0 +1,64 @@
+name: Prod CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.2
+      - name: List files after checkout
+        run: |
+          pwd
+          ls
+      - name: Cache node_modules
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Run build
+        id: build
+        run: npm install
+      - run: npm run build
+      - name: List files after build
+        run: |
+          pwd
+          ls
+      - name: Create a Release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Decrypt API secrets
+        run: gpg --quiet --batch --yes --decrypt --passphrase="$CONNECTION_PASSPHRASE" --output ./build/api/connection-secret.php ./build/api/connection-secret.php.gpg
+        env:
+          CONNECTION_PASSPHRASE: ${{ secrets.CONNECTION_PASSPHRASE }}
+      - name: FTP Deploy to newkrok.com
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          local-dir: "./build/"
+          server-dir: ./
+          server: ${{secrets.FTP_SERVER}}
+          username: ${{secrets.FTP_USER_NAME}}
+          password: ${{secrets.FTP_PASSWORD}}
+          exclude: .git* - .git*/** - .vscode/** - .github/** - *.gpg - *.keys
+          dangerous-clean-slate: true
+  create-sentry-release:
+    runs-on: ubuntu-latest
+    needs: ["build-and-deploy"]
+    steps:
+      - uses: actions/checkout@v2.3.2
+      - name: Create Sentry Release
+        uses: getsentry/action-release@v1.1.2
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production
+          sourcemaps: ./lib

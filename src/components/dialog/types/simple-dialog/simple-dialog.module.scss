@@ -1,0 +1,25 @@
+h1 {
+  margin-top: 0;
+
+  .Name {
+    color: var(--color-0);
+    font-weight: bold;
+  }
+}
+
+.Content {
+  margin: 0 0 30px 0;
+}
+
+.Actions {
+  margin-top: 20px;
+  display: grid;
+  grid-auto-flow: row;
+  grid-gap: 10px;
+  flex-wrap: wrap;
+
+  @media (min-width: 1024px) {
+    grid-auto-flow: column;
+    width: 100%;
+  }
+}

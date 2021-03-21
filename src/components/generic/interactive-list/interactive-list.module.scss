@@ -1,0 +1,34 @@
+.Wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 5px;
+
+  .Entry {
+    text-align: left;
+    margin-bottom: 5px;
+    color: var(--color-6);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, height 0.2s;
+    overflow: hidden;
+    padding: 10px 0;
+    user-select: none;
+    font-weight: bold;
+    align-items: center;
+
+    &:hover {
+      background-color: var(--color-8);
+    }
+  }
+
+  .SelectedEntry {
+    background-color: var(--color-3);
+    color: var(--color-7);
+    cursor: initial;
+
+    &:hover {
+      background-color: var(--color-3);
+    }
+  }
+}
