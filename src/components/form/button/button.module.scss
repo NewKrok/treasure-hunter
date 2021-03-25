@@ -95,3 +95,32 @@
   color: var(--color-6);
   background-color: var(--color-7);
 }
+
+.ImageButton {
+  cursor: pointer;
+  position: absolute;
+  width: 50%;
+  left: 0;
+  transition: opacity 0.3s;
+}
+
+.NormalImage {
+  @extend .ImageButton;
+  opacity: 1;
+  position: relative;
+
+  &:hover {
+    opacity: 0;
+  }
+}
+
+.FocusImage {
+  @extend .ImageButton;
+  opacity: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  &:hover {
+    opacity: 1;
+  }
+}

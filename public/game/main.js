@@ -62,7 +62,7 @@ import {
   updateTPSCameraRotation,
 } from "./src/camera.js";
 
-const USE_DEBUG_RENDERER = true;
+const USE_DEBUG_RENDERER = false;
 let debugRenderer = null;
 
 export const STATE = {

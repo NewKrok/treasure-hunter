@@ -28,9 +28,11 @@ const Button = ({
   navigationTarget = null,
   className = null,
   children = null,
-  autoWidth = true,
+  autoWidth = false,
   isEnabled = true,
   selected = false,
+  normalImg,
+  focusImg,
 }) => {
   const root = useRef();
   const container = useRef();
@@ -82,6 +84,16 @@ const Button = ({
       onClick={onClickHandler}
       ref={root}
     >
+      {normalImg && (
+        <img
+          className={styles.NormalImage}
+          src={normalImg}
+          alt="button image"
+        />
+      )}
+      {focusImg && (
+        <img className={styles.FocusImage} src={focusImg} alt="button image" />
+      )}
       <div ref={container}>
         {(icon || (selectedIcon && selected)) && (
           <i

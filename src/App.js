@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Redirect, Route, Switch } from "react-router";
 import { IntlProvider } from "react-intl";
 
-import Home from "./components/home/home";
+import Menu from "./components/menu/menu";
 import Footer from "./components/footer/footer";
 import { GetUser } from "./store/selectors/auth";
 import {
@@ -24,6 +24,7 @@ import {
 
 import "./App.scss";
 import Gameplay from "./components/gameplay/gameplay";
+import AppPreloader from "./components/preloader/app-preloader/app-preloader";
 
 const App = () => {
   const user = useSelector(GetUser);
@@ -64,9 +65,7 @@ const App = () => {
       onError={() => {}}
     >
       <BrowserRouter basename="/">
-        <div className={`AppLoader ${isSiteinited && "Loaded"}`}>
-          loading...
-        </div>
+        <AppPreloader />
         {isSiteinited && (
           <div className="App">
             <Dialog />
@@ -74,11 +73,10 @@ const App = () => {
               "session..."
             ) : (
               <>
-                {/* <CourseState /> */}
                 {user ? (
                   <>
                     <Switch>
-                      <Route exact path="/" component={Home} />
+                      <Route exact path="/" component={Menu} />
                       <Route
                         exact
                         path="/settings"
@@ -87,16 +85,18 @@ const App = () => {
                       <Route path="/settings" render={Settings} />
                       <Route path="/sign-in" render={redirectToHome} />
                       <Route path="/sign-up" render={redirectToHome} />
+                      <Route path="/play" component={Gameplay} />
                     </Switch>
                     <Footer />
                   </>
                 ) : (
                   <>
                     <Switch>
-                      <Route exact path="/" component={Home} />
+                      <Route exact path="/" component={Menu} />
                       <Route path="/sign-in" component={SignIn} />
                       <Route path="/sign-up" component={SignUp} />
                       <Route path="/settings" render={redirectToLogin} />
+                      <Route path="/play" component={Gameplay} />
                     </Switch>
                     <Footer />
                   </>
@@ -105,7 +105,6 @@ const App = () => {
             )}
           </div>
         )}
-        <Gameplay />
       </BrowserRouter>
     </IntlProvider>
   );

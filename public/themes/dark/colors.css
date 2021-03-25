@@ -1,19 +1,5 @@
 :root {
-  --color-0: #1d6ea1;
-  --color-1: #83a603;
-  --color-2: #f2b705;
-  --color-3: #f28a2e;
-  --color-4: #f26d3d;
-  --color-5: #525252;
-  --color-6: #cccccc;
-  --color-7: #000000;
-  --color-8: #161616;
-  --color-9: #f72323;
-
-  --color-6-rgb: 13, 13, 13;
-  --color-white: #fff;
-  --color-black: #000;
-
-  --color-session-gradient: linear-gradient(90deg, #505050, #b18604);
-  --color-session-border: var(--color-7);
+  --color-0: #ffffff;
+  --color-1: #000000;
+  --color-2: #b5d71b;
 }
