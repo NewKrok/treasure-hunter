@@ -15,6 +15,12 @@
     position: relative;
     width: 100%;
     flex: 1;
+    display: grid;
+    grid-auto-flow: column;
+    grid-gap: 2em;
+    grid-template-columns: 1fr 3fr;
+    padding: 2em;
+    overflow: hidden;
 
     .StartButton {
       position: absolute;
@@ -26,16 +32,6 @@
         width: 50%;
       }
     }
-
-    .News {
-      position: absolute;
-      width: 30%;
-      height: calc(100% - 5em);
-      left: 3em;
-      top: 3em;
-      animation: Show 1s 3s forwards;
-      margin-left: calc(-30% - 3em);
-    }
   }
 }
 
@@ -45,14 +41,5 @@
   }
   to {
     opacity: 1;
-  }
-}
-
-@keyframes Show {
-  from {
-    margin-left: calc(-30% - 3em);
-  }
-  to {
-    margin-left: 0;
   }
 }

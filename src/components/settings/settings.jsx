@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Switch } from "react-router";
 
-import Button, { ButtonStyle } from "../form/button/button";
+import Button, { ButtonStyle } from "../ui/button/button";
 import ProfileSettings from "./pages/profile-settings/profile-settings";
 
 import styles from "./settings.module.scss";

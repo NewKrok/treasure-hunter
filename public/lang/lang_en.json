@@ -1,3 +1,9 @@
 {
-  "hello": "bello"
+  "menu": "Menu",
+  "news": "News",
+  "single-player": "Single Player",
+  "multiplayer": "Multiplayer",
+  "settings": "Settings",
+  "collections": "Collections",
+  "extras": "Extras"
 }

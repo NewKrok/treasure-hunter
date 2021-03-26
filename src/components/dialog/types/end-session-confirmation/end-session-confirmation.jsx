@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { endSession } from "../../../../store/actions/session-action";
 import { GetStartTime } from "../../../../store/selectors/session";
-import Button, { ButtonStyle } from "../../../form/button/button";
+import Button, { ButtonStyle } from "../../../ui/button/button";
 import SimpleDialog from "../simple-dialog/simple-dialog";
 import { formatTime } from "../../../../utils/time";
 

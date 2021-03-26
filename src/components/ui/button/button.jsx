@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
 
 import { GetSiteLanguageMessages } from "../../../store/selectors/app-selector";
+import PrimaryButtonImage from "../../../asset/img/btn-color-brown.png";
 
 import styles from "./button.module.scss";
 
@@ -11,8 +12,6 @@ const ButtonStyle = {
   Primary: "Primary",
   Secondary: "Secondary",
   Tertiary: "Tertiary",
-  Outline: "Outline",
-  OutlineInverse: "OutlineInverse",
 };
 
 const Button = ({
@@ -31,8 +30,6 @@ const Button = ({
   autoWidth = false,
   isEnabled = true,
   selected = false,
-  normalImg,
-  focusImg,
 }) => {
   const root = useRef();
   const container = useRef();
@@ -68,12 +65,6 @@ const Button = ({
     case ButtonStyle.Tertiary:
       styleClassName = styles.TertiaryButton;
       break;
-    case ButtonStyle.Outline:
-      styleClassName = styles.OutlineButton;
-      break;
-    case ButtonStyle.OutlineInverse:
-      styleClassName = styles.OutlineInverseButton;
-      break;
     default:
   }
   return (
@@ -84,16 +75,6 @@ const Button = ({
       onClick={onClickHandler}
       ref={root}
     >
-      {normalImg && (
-        <img
-          className={styles.NormalImage}
-          src={normalImg}
-          alt="button image"
-        />
-      )}
-      {focusImg && (
-        <img className={styles.FocusImage} src={focusImg} alt="button image" />
-      )}
       <div ref={container}>
         {(icon || (selectedIcon && selected)) && (
           <i

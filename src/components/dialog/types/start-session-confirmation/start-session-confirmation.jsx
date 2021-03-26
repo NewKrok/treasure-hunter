@@ -5,7 +5,7 @@ import {
   acceptSessionStart,
   declineSessionStart,
 } from "../../../../store/actions/session-action";
-import Button, { ButtonStyle } from "../../../form/button/button";
+import Button, { ButtonStyle } from "../../../ui/button/button";
 
 import styles from "../simple-dialog/simple-dialog.module.scss";
 import SimpleDialog from "../simple-dialog/simple-dialog";

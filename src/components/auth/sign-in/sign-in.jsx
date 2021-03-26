@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { FormattedMessage } from "react-intl";
 
 import { clearSignInError, signInRequest } from "../../../store/actions/auth";
-import Button, { ButtonStyle } from "../../form/button/button";
+import Button, { ButtonStyle } from "../../ui/button/button";
 import {
   GetIsSignInInProgress,
   GetSignInError,

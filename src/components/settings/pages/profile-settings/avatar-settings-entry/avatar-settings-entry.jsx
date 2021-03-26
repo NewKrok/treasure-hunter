@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { FormattedMessage } from "react-intl";
 
-import Button, { ButtonStyle } from "../../../../form/button/button";
+import Button, { ButtonStyle } from "../../../../ui/button/button";
 import { openDialog } from "../../../../../store/actions/dialog-action";
 import { DIALOG_ID } from "../../../../dialog/dialog";
 

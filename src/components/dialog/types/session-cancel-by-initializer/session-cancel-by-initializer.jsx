@@ -1,6 +1,6 @@
 import React from "react";
 
-import Button, { ButtonStyle } from "../../../form/button/button";
+import Button, { ButtonStyle } from "../../../ui/button/button";
 import SimpleDialog from "../simple-dialog/simple-dialog";
 
 import styles from "../simple-dialog/simple-dialog.module.scss";

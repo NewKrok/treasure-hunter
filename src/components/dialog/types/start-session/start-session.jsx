@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { startSession } from "../../../../store/actions/session-action";
 import { GetSelectedDialogId } from "../../../../store/selectors/dialog";
-import Button, { ButtonStyle } from "../../../form/button/button";
+import Button, { ButtonStyle } from "../../../ui/button/button";
 import { DIALOG_ID } from "../../dialog";
 import SimpleDialog from "../simple-dialog/simple-dialog";
 

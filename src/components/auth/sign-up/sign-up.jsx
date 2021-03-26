@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
 
-import Button, { ButtonStyle } from "../../form/button/button";
+import Button, { ButtonStyle } from "../../ui/button/button";
 import { clearSignUpError, signUpRequest } from "../../../store/actions/auth";
 import {
   GetIsSignUpInProgress,

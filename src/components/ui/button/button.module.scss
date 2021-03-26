@@ -1,0 +1,66 @@
+.PrimaryButton {
+  padding: 5px 10px;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.5em;
+  color: var(--color-0);
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  overflow: hidden;
+  transition: width 0.2s;
+  white-space: nowrap;
+  position: relative;
+  user-select: none;
+  border-width: 12px 24px 23px 24px;
+  border-style: solid;
+  border-image: url("../../../asset/img/btn-color-brown.png");
+  border-image-slice: 25 49 47 49 fill;
+  border-image-repeat: round;
+
+  &:hover {
+    filter: brightness(1.5);
+  }
+}
+
+.SecondaryButton {
+  @extend .PrimaryButton;
+
+  &:hover {
+    filter: contrast(1.1);
+  }
+}
+
+.TertiaryButton {
+  @extend .PrimaryButton;
+
+  &:hover {
+    filter: contrast(1.1);
+  }
+}
+
+.IconMargin {
+  margin-right: 10px;
+}
+
+.Loading {
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.Disabled {
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.Selected {
+  color: var(--color-6);
+  background-color: var(--color-7);
+}

@@ -1,0 +1,18 @@
+.Wrapper {
+  position: relative;
+  animation: Show 1s 3s forwards;
+  display: grid;
+  grid-auto-flow: row;
+  grid-gap: 2em;
+  grid-template-rows: 2fr 1fr;
+  transform: translateX(calc(-100% - 2em));
+}
+
+@keyframes Show {
+  from {
+    transform: translateX(calc(-100% - 2em));
+  }
+  to {
+    transform: translateX(0%);
+  }
+}

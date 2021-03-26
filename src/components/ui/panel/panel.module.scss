@@ -1,25 +1,26 @@
 .Wrapper {
   border-width: 43px 48px 49px 46px;
   border-style: solid;
-  border-image: url("../../asset/img/popup-bg.png");
+  border-image: url("../../../asset/img/popup-bg.png");
   border-image-slice: 86 96 99 92 fill;
   border-image-repeat: round;
   position: relative;
+  font-size: 1em;
+  color: var(--color-0);
 
-  .Label {
+  .LabelContainer {
     position: absolute;
-    top: -3em;
+    top: -4em;
     left: 50%;
     transform: translateX(-50%);
-    border-width: 56px 56px 0 56px;
+    border-width: 56px 93px 0 93px;
     border-style: solid;
-    border-image: url("../../asset/img/popup-title-01.png");
-    border-image-slice: 113 116 0 115 fill;
+    border-image: url("../../../asset/img/popup-title-00.png");
+    border-image-slice: 113 186 0 186 fill;
     border-image-repeat: round;
 
-    div {
+    .Label {
       white-space: nowrap;
-      color: var(--color-0);
       font-weight: bold;
       font-size: 1.3em;
       margin-top: -1.9em;

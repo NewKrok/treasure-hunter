@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Redirect, Route, Switch } from "react-router";
 import { IntlProvider } from "react-intl";
 
-import Menu from "./components/menu/menu";
+import Home from "./components/home/home";
 import Footer from "./components/footer/footer";
 import { GetUser } from "./store/selectors/auth";
 import {
@@ -37,7 +37,7 @@ const App = () => {
   const redirectToHome = () => (
     <Redirect
       to={{
-        pathname: "/",
+        pathname: "/home/single-player",
       }}
     />
   );
@@ -76,7 +76,8 @@ const App = () => {
                 {user ? (
                   <>
                     <Switch>
-                      <Route exact path="/" component={Menu} />
+                      <Route exact path="/" component={redirectToHome} />
+                      <Route path="/home" component={Home} />
                       <Route
                         exact
                         path="/settings"
@@ -92,7 +93,8 @@ const App = () => {
                 ) : (
                   <>
                     <Switch>
-                      <Route exact path="/" component={Menu} />
+                      <Route exact path="/" component={redirectToHome} />
+                      <Route path="/home" component={Home} />
                       <Route path="/sign-in" component={SignIn} />
                       <Route path="/sign-up" component={SignUp} />
                       <Route path="/settings" render={redirectToLogin} />

@@ -4,6 +4,15 @@
   width: 100%;
   height: 5em;
   animation: Show 1s 2s forwards;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .Content {
+    font-size: 2em;
+    color: var(--color-0);
+    margin-top: -0.4em;
+  }
 }
 
 @keyframes Show {
