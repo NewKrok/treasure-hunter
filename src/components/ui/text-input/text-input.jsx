@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useIntl } from "react-intl";
 
 import styles from "./text-input.module.scss";
 
@@ -10,7 +11,6 @@ const TextInput = ({
   onFocus = null,
   value,
   setValue,
-  iconPrefix = "fas",
   icon = "",
   autoComplete = "on",
   onKeyDown,
@@ -19,6 +19,7 @@ const TextInput = ({
   maxLength = null,
 }) => {
   const input = useRef();
+  const formattedPlaceholder = useIntl().formatMessage({ id: placeholder });
 
   useEffect(() => {
     if (insertValue === null) return;
@@ -35,11 +36,16 @@ const TextInput = ({
   }, [value, setValue, insertValue, setInsertValue]);
 
   return (
-    <div className={`${styles.Wrapper} ${className}`}>
+    <div
+      className={`${styles.Wrapper} ${
+        value === "" && styles.Empty
+      } ${className}`}
+    >
+      {icon && <img src={icon} alt="button icon" />}
       <input
         ref={input}
         name={name}
-        placeholder={placeholder}
+        placeholder={formattedPlaceholder}
         type={type}
         onFocus={onFocus}
         value={value}
@@ -49,7 +55,6 @@ const TextInput = ({
         onKeyDown={onKeyDown}
         maxLength={maxLength}
       />
-      {icon && <i className={`${iconPrefix} ${icon}`}></i>}
     </div>
   );
 };

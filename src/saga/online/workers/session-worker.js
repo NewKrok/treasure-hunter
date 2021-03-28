@@ -12,7 +12,7 @@ import { eventChannel } from "redux-saga";
 import firebase from "firebase/app";
 
 import { SESSION_DATA } from "../../../common/database/database";
-import { GetUser } from "../../../store/selectors/auth";
+import { GetUser } from "../../../store/selectors/auth-selector";
 import {
   GetSessionState,
   GetStunServerOfSession,

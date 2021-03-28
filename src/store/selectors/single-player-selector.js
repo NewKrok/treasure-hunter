@@ -16,6 +16,14 @@ export const GetSelectedSinglePlayerLevelDetails = (state) => {
   return GetSinglePlayerLevelDetails({ areaId, levelId });
 };
 
+export const GetSinglePlayerLevelProgressData = ({ areaId, levelId }) => (
+  state
+) => {
+  state.singlePlayerReducer.levelProgressDatas.find(
+    (data) => data.areaId === areaId && data.levelId === levelId
+  );
+};
+
 export const GetSelectedSinglePlayerAreaDetails = (state) => {
   const areaId = GetSelectedSinglePlayerAreaId(state);
 

@@ -1,19 +1,15 @@
-import { call, put, take, takeLatest } from "redux-saga/effects";
-import { rsf } from "../firebase";
+import { call, put, take } from "redux-saga/effects";
+import { rsf } from "../../firebase";
 import md5 from "md5";
 
 import {
-  signInRequest,
-  signUpRequest,
   setSignUpError,
   setSignInError,
-  signOutRequest,
   setUser,
-} from "../store/actions/auth";
-import { initApp } from "../store/actions/app-action";
-import { USERS } from "../common/database/database";
+} from "../../store/actions/auth";
+import { USERS } from "../../common/database/database";
 
-function* initAppHandler() {
+export function* initAppHandler() {
   const channel = yield call(rsf.auth.channel);
 
   while (true) {
@@ -23,7 +19,7 @@ function* initAppHandler() {
   }
 }
 
-function* _signUpRequest(action) {
+export function* signUpRequestHandler(action) {
   const { email, password, displayName } = action.payload;
 
   try {
@@ -31,7 +27,7 @@ function* _signUpRequest(action) {
       email,
       password
     );
-    console.log(authResult);
+
     const userData = {
       uid: authResult.user.uid,
       displayName,
@@ -46,7 +42,7 @@ function* _signUpRequest(action) {
   }
 }
 
-function* _signInRequest(action) {
+export function* signInRequestHandler(action) {
   const { email, password } = action.payload;
   try {
     const user = yield rsf.auth.signInWithEmailAndPassword(email, password);
@@ -56,7 +52,7 @@ function* _signInRequest(action) {
   }
 }
 
-function* _signOutRequest() {
+export function* signOutRequestHandler() {
   try {
     yield rsf.auth.signOut();
     yield put(setUser(null));
@@ -65,11 +61,8 @@ function* _signOutRequest() {
   }
 }
 
-const Auth = [
-  takeLatest(initApp().type, initAppHandler),
-  takeLatest(signUpRequest().type, _signUpRequest),
-  takeLatest(signInRequest().type, _signInRequest),
-  takeLatest(signOutRequest().type, _signOutRequest),
-];
-
-export default Auth;
+export function* guestSignInRequestHandler() {
+  const user = yield rsf.auth.signInAnonymously();
+  yield put(setUser(user));
+  //yield put(showNotification(`Successful sign in as a guest`));
+}

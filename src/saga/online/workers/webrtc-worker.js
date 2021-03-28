@@ -3,7 +3,7 @@ import { call, put, select, takeEvery } from "redux-saga/effects";
 import firebase from "firebase/app";
 
 import { connectionEstablished } from "../../../store/actions/session-action";
-import { GetUser } from "../../../store/selectors/auth";
+import { GetUser } from "../../../store/selectors/auth-selector";
 import { GetStunServerOfSession } from "../../../store/selectors/session";
 import { error, info } from "../../../utils/logger";
 import { createThreadId } from "../../../utils/thread";

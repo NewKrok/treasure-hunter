@@ -1,7 +1,7 @@
 import { all, call, put } from "redux-saga/effects";
 
 import { initApp } from "../store/actions/app-action";
-import Auth from "./auth";
+import AuthSaga from "./auth-saga";
 import UserSaga from "./user-saga";
 import SiteLanguage from "./site-language";
 import SessionSaga from "./online/session-saga";
@@ -13,7 +13,7 @@ function* initialCall() {
 
 function* Index() {
   yield all([
-    ...Auth,
+    ...AuthSaga,
     ...UserSaga,
     ...SiteLanguage,
     ...SessionSaga,

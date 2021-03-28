@@ -5,13 +5,16 @@
   height: 5em;
   animation: Show 1s 2s forwards;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 1em;
 
-  .Content {
-    font-size: 2em;
-    color: var(--color-0);
-    margin-top: -0.4em;
+  .Avatar {
+    margin: 0.5em 2em;
+  }
+
+  .Error {
+    margin-left: 2em;
+    height: 4.25em;
   }
 }
 

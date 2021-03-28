@@ -33,7 +33,6 @@ const SinglePlayer = () => {
               navigationTarget="/play"
               style={ButtonStyle.Primary}
               messageId="play"
-              navigationTarget="play"
             />
           </div>
         )}

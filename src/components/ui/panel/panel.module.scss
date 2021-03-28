@@ -7,10 +7,11 @@
   position: relative;
   font-size: 1em;
   color: var(--color-0);
+  padding-top: 1em;
 
   .LabelContainer {
     position: absolute;
-    top: -4em;
+    top: -3.5em;
     left: 50%;
     transform: translateX(-50%);
     border-width: 56px 93px 0 93px;

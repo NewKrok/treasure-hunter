@@ -3,7 +3,7 @@ import firebase from "firebase/app";
 
 import { emailChanged } from "../../store/actions/user-action";
 import { USERS } from "../../common/database/database";
-import { GetUser } from "../../store/selectors/auth";
+import { GetUser } from "../../store/selectors/auth-selector";
 import { closeDialog } from "../../store/actions/dialog-action";
 
 export function* changeDisplayNameHandler({ payload: displayName }) {

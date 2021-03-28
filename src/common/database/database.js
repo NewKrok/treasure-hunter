@@ -6,6 +6,7 @@ export const TYPING = "TYPING";
 export const STREAM_DATA = "STREAM_DATA";
 export const SESSION_DATA = "SESSION_DATA";
 export const NEWS = "NEWS";
+export const LEVEL_PROGRESS_DATA = "LEVEL_PROGRESS_DATA";
 
 export const FirebaseStorage = {
   AVATARS: "AVATARS",

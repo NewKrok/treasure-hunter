@@ -5,7 +5,7 @@ import {
   changeDisplayName,
   changeEmail,
 } from "../../../../store/actions/user-action";
-import { GetUser } from "../../../../store/selectors/auth";
+import { GetUser } from "../../../../store/selectors/auth-selector";
 import SettingsTextEntry from "../common/settings-text-entry";
 import AvatarSettingsEntry from "./avatar-settings-entry/avatar-settings-entry";
 

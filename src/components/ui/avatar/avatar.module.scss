@@ -1,0 +1,32 @@
+.Wrapper {
+  width: 7em;
+  height: 7em;
+  position: relative;
+  background-image: url("../../../asset/img/my_info_profile_empty.png");
+  background-size: 80%;
+  background-position: calc(50% - 3px) calc(50% - 5px);
+  background-repeat: no-repeat;
+  overflow: hidden;
+  border-radius: 50%;
+  cursor: pointer;
+
+  &::after {
+    content: "";
+    background-image: url("../../../asset/img/my_info_profile_frame.png");
+    background-size: contain;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    width: 62%;
+    height: 62%;
+    position: absolute;
+    left: calc(50% - 3px);
+    top: calc(50% - 3px);
+    transform: translate(-50%, -50%);
+  }
+}

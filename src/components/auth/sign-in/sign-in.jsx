@@ -1,21 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { FormattedMessage } from "react-intl";
 
-import { clearSignInError, signInRequest } from "../../../store/actions/auth";
+import {
+  clearSignInError,
+  signInRequest,
+  guestSignInRequest,
+} from "../../../store/actions/auth";
 import Button, { ButtonStyle } from "../../ui/button/button";
 import {
   GetIsSignInInProgress,
   GetSignInError,
-} from "../../../store/selectors/auth";
+} from "../../../store/selectors/auth-selector";
 
-import formStyle from "../../../common/style/form.module.scss";
-import authStyles from "../auth.module.scss";
+import TextInput from "../../ui/text-input/text-input";
+import Panel from "../../ui/panel/panel";
+
+import EmailIcon from "../../../asset/img/input_field_icon_email.png";
+import PasswordIcon from "../../../asset/img/input_field_icon_pw.png";
+
+import styles from "../auth.module.scss";
+import { FormattedMessage } from "react-intl";
 
 const SignIn = () => {
   const dispatch = useDispatch();
-  const { register, trigger, getValues, clearErrors, errors } = useForm();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { trigger, getValues, clearErrors, errors } = useForm();
   const signInError = useSelector(GetSignInError);
   const isSignInInProgress = useSelector(GetIsSignInInProgress);
   const hasEmailError = [
@@ -39,69 +50,79 @@ const SignIn = () => {
     });
   };
 
+  const onGuestSignInRequest = () => dispatch(guestSignInRequest());
+
   const onFormKeyDown = (e) => {
     if (e.keyCode === 13) onSignInRequest();
   };
 
   return (
-    <div className={authStyles.Wrapper}>
-      <form className={authStyles.Form} onKeyDown={onFormKeyDown}>
-        <h1>
-          <FormattedMessage id={"sign-in-title"} />
-        </h1>
-        <div className={authStyles.InputBlock}>
-          <input
-            className={formStyle.Input}
-            name="email"
-            placeholder="Your e-mail address"
-            type="email"
-            ref={register({ required: true, maxLength: 250 })}
-            onFocus={clearEmailError}
-          />
-          {(errors.email || hasEmailError) && (
-            <span className={formStyle.InputError}>
-              {signInError?.message || "This field is required"}
-            </span>
-          )}
-          <i className={`fas fa-at ${authStyles.InputIcon}`}></i>
+    <Panel className={styles.Wrapper} label="sign-in">
+      <form className={styles.Form} onKeyDown={onFormKeyDown}>
+        <div className={styles.InputArea}>
+          <div className={styles.InputBlock}>
+            <TextInput
+              value={email}
+              setValue={setEmail}
+              icon={EmailIcon}
+              onFocus={clearEmailError}
+              placeholder="email"
+              autoComplete="treasure-hunter-email"
+              maxLength={250}
+            />
+            {(errors.email || hasEmailError) && (
+              <span className={styles.InputError}>
+                {signInError?.message || "This field is required"}
+              </span>
+            )}
+          </div>
+          <div className={styles.InputBlock}>
+            <TextInput
+              value={password}
+              setValue={setPassword}
+              icon={PasswordIcon}
+              onFocus={clearPasswordError}
+              type="password"
+              placeholder="password"
+              autoComplete="treasure-hunter-password"
+              maxLength={100}
+            />
+            {(errors.password || hasPasswordError) && (
+              <span className={styles.InputError}>
+                {signInError?.message || "This field is required"}
+              </span>
+            )}
+          </div>
         </div>
-        <div className={authStyles.InputBlock}>
-          <input
-            className={formStyle.Input}
-            name="password"
-            autoComplete="webapp-password"
-            placeholder="Your password"
-            type="password"
-            ref={register({ required: true, maxLength: 100 })}
-            onFocus={clearPasswordError}
-          />
-          {(errors.password || hasPasswordError) && (
-            <span className={formStyle.InputError}>
-              {signInError?.message || "This field is required"}
-            </span>
-          )}
-          <i className={`fas fa-key ${authStyles.InputIcon}`}></i>
-        </div>
-        <div className={authStyles.ActionArea}>
+        <div className={styles.ActionArea}>
           <Button
             messageId="sign-in"
-            icon="fa-sign-in-alt"
             onClick={onSignInRequest}
-            style={ButtonStyle.Primary}
+            style={ButtonStyle.Secondary}
             isLoading={isSignInInProgress}
             autoWidth={false}
           />
-          <span>or</span>
+          <span>
+            <FormattedMessage id="or" />
+          </span>
           <Button
             messageId="sign-up"
-            icon="fa-user-plus"
-            style={ButtonStyle.Secondary}
-            navigationTarget="/sign-up"
+            style={ButtonStyle.Primary}
+            navigationTarget="/home/single-player/sign-up"
+            autoWidth={false}
+          />
+          <span>
+            <FormattedMessage id="or" />
+          </span>
+          <Button
+            messageId="play-as-guest"
+            onClick={onGuestSignInRequest}
+            style={ButtonStyle.Tertiary}
             autoWidth={false}
           />
         </div>
       </form>
-    </div>
+    </Panel>
   );
 };
 

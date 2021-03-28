@@ -15,9 +15,22 @@
     font-size: 1.5em;
     font-weight: bold;
   }
+
+  img {
+    width: 50px;
+  }
 }
 
 .Selected {
   filter: brightness(1.5);
   pointer-events: none;
+}
+
+.Locked {
+  pointer-events: none;
+  border-width: 32px 32px 32px 32px;
+  border-style: solid;
+  border-image: url("../../../../../../asset/img/stage-lock.png");
+  border-image-slice: 64 64 64 64 fill;
+  border-image-repeat: round;
 }

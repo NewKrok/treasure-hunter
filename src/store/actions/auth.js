@@ -3,6 +3,9 @@ import { createAction } from "./action-creator";
 export const signUpRequest = createAction({
   type: "SIGN_UP_REQUEST",
 });
+export const guestSignInRequest = createAction({
+  type: "GUEST_SIGN_IN_REQUEST",
+});
 export const signInRequest = createAction({
   type: "SIGN_IN_REQUEST",
 });

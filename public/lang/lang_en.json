@@ -1,4 +1,13 @@
 {
+  "not-logged-in": "You are not logged in yet.",
+  "sign-in": "Login",
+  "sign-up": "Sign up",
+  "play-as-guest": "Play as Guest",
+  "email": "Your e-mail address",
+  "your-nickname": "Your Nickname",
+  "password": "Your password",
+  "password-confirmation": "Password confirmation",
+  "or": "or",
   "menu": "Menu",
   "news": "News",
   "single-player": "Single Player",

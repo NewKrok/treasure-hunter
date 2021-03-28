@@ -31,6 +31,12 @@
 .SecondaryButton {
   @extend .PrimaryButton;
 
+  border-width: 12px 24px 23px 24px;
+  border-style: solid;
+  border-image: url("../../../asset/img/btn-color-blue.png");
+  border-image-slice: 25 49 47 49 fill;
+  border-image-repeat: round;
+
   &:hover {
     filter: contrast(1.1);
   }
@@ -38,6 +44,13 @@
 
 .TertiaryButton {
   @extend .PrimaryButton;
+
+  border-width: 12px 24px 23px 24px;
+  border-style: solid;
+  border-image: url("../../../asset/img/btn-color-green.png");
+  border-image-slice: 25 49 47 49 fill;
+  border-image-repeat: round;
+  color: var(--color-1);
 
   &:hover {
     filter: contrast(1.1);

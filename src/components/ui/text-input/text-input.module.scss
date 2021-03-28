@@ -2,30 +2,57 @@
   position: relative;
   filter: var(--slight-shadow);
 
+  img {
+    position: absolute;
+    left: 1em;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.5em;
+    height: 1.5em;
+  }
+
   input {
+    color: var(--color-0);
     width: 100%;
     outline: none;
-    border: none;
     border-radius: 5px;
-    font-size: 1em;
-    padding: 10px 15px;
-    border: 1px solid var(--color-5);
+    font-size: 1.2em;
+    font-family: "Karla", sans-serif;
+    padding: 10px 15px 11px;
+    background: none;
+    border: none;
+    border-width: 8px 8px 8px 8px;
+    border-style: solid;
+    border-image: url("../../../asset/img/input-field-bg-normal.png");
+    border-image-slice: 19 19 19 19 fill;
+    border-image-repeat: round;
 
     &:focus,
     &:active {
       outline: none;
-      border: 1px solid var(--color-6);
+      border-width: 8px 8px 8px 8px;
+      border-style: solid;
+      border-image: url("../../../asset/img/input-field-bg-typing.png");
+      border-image-slice: 19 19 19 19 fill;
+      border-image-repeat: round;
     }
   }
 
   .WithIcon {
-    padding-left: 35px;
+    padding-left: 2.5em;
+  }
+}
+
+.Empty {
+  img {
+    opacity: 0.2;
   }
 
-  i {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+  input {
+    border-width: 8px 8px 8px 8px;
+    border-style: solid;
+    border-image: url("../../../asset/img/input-field-bg-hint.png");
+    border-image-slice: 19 19 19 19 fill;
+    border-image-repeat: round;
   }
 }

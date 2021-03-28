@@ -11,7 +11,7 @@ import CounterNotification from "../form/counter-notification/counter-notificati
 import { GetActiveTheme } from "../../store/selectors/app-selector";
 import { Themes } from "../../enum/themes";
 import { setTheme } from "../../store/actions/app-action";
-import { GetUser } from "../../store/selectors/auth";
+import { GetUser } from "../../store/selectors/auth-selector";
 
 const Header = () => {
   const dispatch = useDispatch();

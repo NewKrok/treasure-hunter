@@ -7,7 +7,7 @@ import { IntlProvider } from "react-intl";
 
 import Home from "./components/home/home";
 import Footer from "./components/footer/footer";
-import { GetUser } from "./store/selectors/auth";
+import { GetUser } from "./store/selectors/auth-selector";
 import {
   GetIsSiteinited,
   GetSiteLanguageId,

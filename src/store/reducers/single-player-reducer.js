@@ -1,8 +1,12 @@
-import { selectSinglePlayerLevel } from "../actions/single-player-action";
+import {
+  selectSinglePlayerLevel,
+  setLevelProgressDatas,
+} from "../actions/single-player-action";
 
 const initialState = {
   selectedAreaId: 0,
   selectedLevelId: 0,
+  levelProgressDatas: [],
 };
 
 const selectSinglePlayerLevelHandler = ({
@@ -13,8 +17,17 @@ const selectSinglePlayerLevelHandler = ({
   selectedLevelId,
 });
 
+const setLevelProgressDatasHandler = ({
+  state,
+  payload: levelProgressDatas,
+}) => ({
+  ...state,
+  levelProgressDatas,
+});
+
 const configMap = {
   [selectSinglePlayerLevel().type]: selectSinglePlayerLevelHandler,
+  [setLevelProgressDatas().type]: setLevelProgressDatasHandler,
 };
 
 const singlePlayerReducer = (state = initialState, action) => {

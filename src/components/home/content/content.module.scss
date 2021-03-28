@@ -6,6 +6,19 @@
   height: 100%;
   transform: translateX(calc(100% + 2em));
   padding: 0;
+  position: relative;
+
+  .Auth {
+    position: absolute;
+    width: calc(100% + 84px);
+    height: calc(100% + 75px);
+    background-color: var(--slightly-transparent-cover);
+    margin: -38px -40px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 @keyframes Show {
