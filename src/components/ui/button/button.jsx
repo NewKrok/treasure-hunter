@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router";
 
 import { GetSiteLanguageMessages } from "../../../store/selectors/app-selector";
-import PrimaryButtonImage from "../../../asset/img/btn-color-brown.png";
 
 import styles from "./button.module.scss";
 

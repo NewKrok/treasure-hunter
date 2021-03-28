@@ -1,10 +1,8 @@
 .Wrapper {
   position: relative;
   animation: Show 1s 3s forwards;
-  display: grid;
-  grid-auto-flow: row;
-  grid-gap: 2em;
-  grid-template-rows: 2fr 1fr;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   transform: translateX(calc(100% + 2em));
   padding: 0;

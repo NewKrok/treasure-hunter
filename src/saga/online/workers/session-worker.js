@@ -29,7 +29,6 @@ import { getStunServer } from "../helper/server";
 import { createThreadId } from "../../../utils/thread";
 import { initPeer, initConnection, closeConnection } from "./webrtc-worker";
 import { setAutoSessionRequestCancelTime } from "../../../store/actions/session-action";
-import { startVideoChat } from "../../../store/actions/stream-action";
 import {
   callSendChatMessage,
   callSetChatTypingState,
@@ -122,7 +121,7 @@ export function* startSessionHandler() {
     yield fork(initConnection);
     const sessionState = select(GetSessionState);
     if (sessionState !== SessionState.IN_PROGRESS) {
-      yield put(startVideoChat());
+      //yield put(startVideoChat());
     }
     firebase
       .database()

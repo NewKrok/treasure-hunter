@@ -12,7 +12,6 @@ import {
   startSessionRequest,
 } from "../../store/actions/session-action";
 import {
-  listenForRequests,
   startSessionRequestHandler,
   endSessionRequestHandler,
   endSessionHandler,
@@ -24,10 +23,8 @@ import {
   setSessionChatTypingStateHandler,
 } from "./workers/session-worker";
 import { receiveEndSession } from "../../store/actions/server-action";
-import { addUsers } from "../../store/actions/users-action";
 
 const SessionSaga = [
-  takeEvery(addUsers().type, listenForRequests),
   takeLatest(startSessionRequest().type, startSessionRequestHandler),
   takeLatest(endSessionRequest().type, endSessionRequestHandler),
   takeLatest(endSession().type, endSessionHandler),

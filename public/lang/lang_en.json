@@ -5,5 +5,9 @@
   "multiplayer": "Multiplayer",
   "settings": "Settings",
   "collections": "Collections",
-  "extras": "Extras"
+  "extras": "Extras",
+  "play": "Play",
+  "area-0": "Molten Mountain",
+  "title-0-0": "👋 Welcome",
+  "description-0-0": "This is a tutorial level, here you can learn the basics related to the control. Did you know that you can control the game with Gamepad 🎮 too? Check the settings to get more details."
 }

@@ -3,7 +3,6 @@ import { call, put, select, takeEvery } from "redux-saga/effects";
 import firebase from "firebase/app";
 
 import { connectionEstablished } from "../../../store/actions/session-action";
-import { saveIncomingStream } from "../../../store/actions/stream-action";
 import { GetUser } from "../../../store/selectors/auth";
 import { GetStunServerOfSession } from "../../../store/selectors/session";
 import { error, info } from "../../../utils/logger";
@@ -53,7 +52,7 @@ export function* initConnection() {
 function* peerConnectionChannelHandler({ eventType, e }) {
   switch (eventType) {
     case "onaddstream":
-      yield put(saveIncomingStream(e.stream));
+      //yield put(saveIncomingStream(e.stream));
       break;
 
     case "oniceconnectionstatechange":

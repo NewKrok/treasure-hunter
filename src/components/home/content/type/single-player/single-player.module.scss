@@ -1,0 +1,46 @@
+.Wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .Selected {
+    display: flex;
+    margin-top: 2em;
+    width: 100%;
+    flex-grow: 1;
+
+    .Preview {
+      border-width: 32px 32px 32px 32px;
+      border-style: solid;
+      border-image: url("../../../../../asset/img/shop-img-bg.png");
+      border-image-slice: 64 64 64 64 fill;
+      border-image-repeat: round;
+      margin-right: 2em;
+      width: 40%;
+    }
+
+    .Details {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      .Description {
+        font-size: 1.2em;
+        text-align: left;
+
+        .Name {
+          font-size: 1.5em;
+          font-weight: bold;
+          color: var(--color-2);
+          margin-bottom: 0.2em;
+
+          .Area {
+            display: inline;
+            color: var(--color-0);
+          }
+        }
+      }
+    }
+  }
+}

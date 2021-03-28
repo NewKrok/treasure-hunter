@@ -9,6 +9,8 @@ import ReduxSagaFirebase from "redux-saga-firebase";
 const firebaseConfig = {
   apiKey: "AIzaSyAKrNapghyUBnMF80f6a0zakr7qM2DHf2g",
   authDomain: "treasure-hunter-e9334.firebaseapp.com",
+  databaseURL:
+    "https://treasure-hunter-e9334-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "treasure-hunter-e9334",
   storageBucket: "treasure-hunter-e9334.appspot.com",
   messagingSenderId: "323599957778",

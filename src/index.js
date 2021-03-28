@@ -12,6 +12,8 @@ import authReducer from "./store/reducers/auth";
 import appReducer from "./store/reducers/app-reducer";
 import sessionReducer from "./store/reducers/session-reducer";
 import dialogReducer from "./store/reducers/dialog-reducer";
+import singlePlayerReducer from "./store/reducers/single-player-reducer";
+import newsReducer from "./store/reducers/news-reducer";
 import App from "./App";
 
 import "./config.css";
@@ -36,6 +38,8 @@ const rootReducer = combineReducers({
   appReducer,
   sessionReducer,
   dialogReducer,
+  singlePlayerReducer,
+  newsReducer,
 });
 
 const store = createStore(

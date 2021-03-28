@@ -1,0 +1,34 @@
+.Wrapper {
+  width: 100%;
+  position: relative;
+  margin-bottom: 1em;
+
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: calc(100% - 60px);
+    height: calc(100% - 60px);
+    border-width: 32px 32px 32px 32px;
+    border-style: solid;
+    border-image: url("../../../../../asset/img/shop-img-bg.png");
+    border-image-slice: 64 64 64 64 fill;
+    border-image-repeat: round;
+    left: 0;
+    top: 0;
+  }
+
+  .Container {
+    position: relative;
+    padding: 10px;
+
+    .Date {
+      color: var(--color-2);
+      font-size: 0.9em;
+    }
+
+    .Content {
+      color: var(--color-0);
+    }
+  }
+}
