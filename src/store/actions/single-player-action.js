@@ -4,6 +4,10 @@ export const selectSinglePlayerLevel = createAction({
   type: "SELECT_SINGLE_PLAYER_LEVEL",
 });
 
-export const setLevelProgressDatas = createAction({
-  type: "SET_LEVEL_PROGRESS_DATAS",
+export const setLocalLevelProgressData = createAction({
+  type: "SET_LOCAL_LEVEL_PROGRESS_DATA",
+});
+
+export const overrideLocalLevelProgressData = createAction({
+  type: "OVERRIDE_LOCAL_LEVEL_PROGRESS_DATA",
 });

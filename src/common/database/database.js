@@ -1,4 +1,4 @@
-export const USERS = "USERS";
+export const PROFILES = "PROFILES";
 export const MESSAGE_THREADS = "MESSAGE_THREADS";
 export const USER_NOTES = "USER_NOTES";
 export const PRESENCE = "PRESENCE";

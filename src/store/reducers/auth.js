@@ -6,10 +6,12 @@ import {
   clearSignUpError,
   clearSignInError,
   setUser,
-} from "../actions/auth";
+  setProfile,
+} from "../actions/auth-action";
 
 const initialState = {
   user: null,
+  userDetails: null,
   signUpError: null,
   signInError: null,
   isSignUpInProgress: false,
@@ -28,15 +30,15 @@ const signInRequestHandler = ({ state }) => ({
   signInError: null,
 });
 
-const setSignUpErrorHandler = ({ state, payload }) => ({
+const setSignUpErrorHandler = ({ state, payload: signUpError }) => ({
   ...state,
-  signUpError: payload,
+  signUpError,
   isSignUpInProgress: false,
 });
 
-const setSignInErrorHandler = ({ state, payload }) => ({
+const setSignInErrorHandler = ({ state, payload: signInError }) => ({
   ...state,
-  signInError: payload,
+  signInError,
   isSignInInProgress: false,
 });
 
@@ -50,11 +52,16 @@ const clearSignInErrorHandler = ({ state }) => ({
   signInError: null,
 });
 
-const setUserHandler = ({ state, payload }) => ({
+const setUserHandler = ({ state, payload: user }) => ({
   ...state,
-  user: payload,
+  user,
   isSignInInProgress: false,
   isSignUpInProgress: false,
+});
+
+const setProfileHandler = ({ state, payload: profile }) => ({
+  ...state,
+  profile,
 });
 
 const configMap = {
@@ -65,6 +72,7 @@ const configMap = {
   [clearSignUpError().type]: clearSignUpErrorHandler,
   [clearSignInError().type]: clearSignInErrorHandler,
   [setUser().type]: setUserHandler,
+  [setProfile().type]: setProfileHandler,
 };
 
 const authReducer = (state = initialState, action) => {

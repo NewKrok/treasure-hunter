@@ -24,7 +24,7 @@ import {
   setSessionData,
 } from "../../../store/actions/session-action";
 import { closeDialog, openDialog } from "../../../store/actions/dialog-action";
-import { DIALOG_ID } from "../../../components/dialog/dialog";
+import { DialogId } from "../../../components/dialog/dialog";
 import { getStunServer } from "../helper/server";
 import { createThreadId } from "../../../utils/thread";
 import { initPeer, initConnection, closeConnection } from "./webrtc-worker";
@@ -59,7 +59,7 @@ export function* onRequestAddedHandler(snap) {
   };
 
   yield put(setSessionData({ stunServer }));
-  yield put(openDialog(DIALOG_ID.START_SESSION_CONFIRMATION));
+  yield put(openDialog(DialogId.START_SESSION_CONFIRMATION));
 
   const ownUser = yield select(GetUser);
   const databaseRef = firebase
@@ -79,7 +79,7 @@ export function* onRequestAddedHandler(snap) {
 
   if (res.cancel) {
     yield put(closeDialog());
-    yield put(openDialog(DIALOG_ID.SESSION_CANCEL_BY_INITIALIZER));
+    yield put(openDialog(DialogId.SESSION_CANCEL_BY_INITIALIZER));
     yield put(destroySession());
   }
 }
@@ -89,7 +89,7 @@ export function* startSessionRequestHandler() {
   const stunServer = getStunServer();
 
   yield put(setSessionData({ selectedUser, stunServer }));
-  yield put(openDialog(DIALOG_ID.START_SESSION));
+  yield put(openDialog(DialogId.START_SESSION));
 }
 
 export function* startSessionHandler() {
@@ -166,7 +166,7 @@ function* listenForAutoCancel() {
     yield delay(1000);
   } while (autoCancelTime > 0);
 
-  yield put(openDialog(DIALOG_ID.SESSION_AUTO_CANCEL));
+  yield put(openDialog(DialogId.SESSION_AUTO_CANCEL));
   yield put(destroySession());
 }
 
@@ -187,7 +187,7 @@ export function* listenForCancelSessionData({ selectedUser }) {
 
 export function* onSessionCancelHandler(snap) {
   if (snap.val() === null) {
-    yield put(openDialog(DIALOG_ID.SESSION_DECLINED));
+    yield put(openDialog(DialogId.SESSION_DECLINED));
     yield put(destroySession());
   }
 }
@@ -216,7 +216,7 @@ export function* declineSessionStartHandler() {
 }
 
 export function* endSessionRequestHandler() {
-  yield put(openDialog(DIALOG_ID.END_SESSION_CONFIRMATION));
+  yield put(openDialog(DialogId.END_SESSION_CONFIRMATION));
 }
 
 export function* endSessionHandler() {

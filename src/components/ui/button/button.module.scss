@@ -1,4 +1,4 @@
-.PrimaryButton {
+.BaseButton {
   padding: 5px 10px;
   outline: none;
   border: none;
@@ -17,33 +17,34 @@
   white-space: nowrap;
   position: relative;
   user-select: none;
-  border-width: 12px 24px 23px 24px;
-  border-style: solid;
-  border-image: url("../../../asset/img/btn-color-brown.png");
-  border-image-slice: 25 49 47 49 fill;
-  border-image-repeat: round;
 
   &:hover {
     filter: brightness(1.5);
   }
 }
 
+.PrimaryButton {
+  @extend .BaseButton;
+
+  border-width: 12px 24px 23px 24px;
+  border-style: solid;
+  border-image: url("../../../asset/img/btn-color-brown.png");
+  border-image-slice: 25 49 47 49 fill;
+  border-image-repeat: round;
+}
+
 .SecondaryButton {
-  @extend .PrimaryButton;
+  @extend .BaseButton;
 
   border-width: 12px 24px 23px 24px;
   border-style: solid;
   border-image: url("../../../asset/img/btn-color-blue.png");
   border-image-slice: 25 49 47 49 fill;
   border-image-repeat: round;
-
-  &:hover {
-    filter: contrast(1.1);
-  }
 }
 
 .TertiaryButton {
-  @extend .PrimaryButton;
+  @extend .BaseButton;
 
   border-width: 12px 24px 23px 24px;
   border-style: solid;
@@ -51,10 +52,15 @@
   border-image-slice: 25 49 47 49 fill;
   border-image-repeat: round;
   color: var(--color-1);
+}
 
-  &:hover {
-    filter: contrast(1.1);
-  }
+.CloseButton {
+  @extend .BaseButton;
+
+  width: 52px;
+  height: 58px;
+  background-image: url("../../../asset/img/popup-btn-close.png");
+  background-size: 100%;
 }
 
 .IconMargin {

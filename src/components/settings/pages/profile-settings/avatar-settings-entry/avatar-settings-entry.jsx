@@ -4,7 +4,7 @@ import { FormattedMessage } from "react-intl";
 
 import Button, { ButtonStyle } from "../../../../ui/button/button";
 import { openDialog } from "../../../../../store/actions/dialog-action";
-import { DIALOG_ID } from "../../../../dialog/dialog";
+import { DialogId } from "../../../../dialog/dialog";
 
 import commonStyles from "../../../settings.module.scss";
 import styles from "./avatar-settings-entry.module.scss";
@@ -14,13 +14,13 @@ const AvatarSettingsEntry = () => {
   const user = {};
 
   const openRandomAvatarGeneratorRequest = () =>
-    dispatch(openDialog(DIALOG_ID.RANDOM_AVATAR_GENERATOR));
+    dispatch(openDialog(DialogId.RANDOM_AVATAR_GENERATOR));
 
   const openAvatarUploaderRequest = () =>
-    dispatch(openDialog(DIALOG_ID.AVATAR_UPLOADER));
+    dispatch(openDialog(DialogId.AVATAR_UPLOADER));
 
   const openAvatarCreatorRequest = () =>
-    dispatch(openDialog(DIALOG_ID.AVATAR_CREATOR));
+    dispatch(openDialog(DialogId.AVATAR_CREATOR));
 
   return (
     <div className={commonStyles.Entry}>

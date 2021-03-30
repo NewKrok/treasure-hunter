@@ -6,8 +6,11 @@ import { closeDialog } from "../../store/actions/dialog-action";
 import { getDialog } from "./dialog-configs";
 
 import styles from "./dialog.module.scss";
+import Panel from "../ui/panel/panel";
+import Button, { ButtonStyle } from "../ui/button/button";
 
-export const DIALOG_ID = {
+export const DialogId = {
+  PROFILE: "PROFILE",
   START_SESSION: "START_SESSION",
   START_SESSION_CONFIRMATION: "START_SESSION_CONFIRMATION",
   SESSION_DECLINED: "SESSION_DECLINED",
@@ -52,12 +55,17 @@ const Dialog = () => {
         onClick={activeDialog.isCloseable ? close : null}
       />
       <div className={`${styles.Content} ${dialogId && styles.ActiveContent}`}>
-        {activeDialog.isCloseable && (
-          <div className={styles.Close} onClick={close}>
-            <i className="far fa-times-circle"></i>
-          </div>
-        )}
-        {lastContent.current}
+        <Panel label={activeDialog.label}>
+          {activeDialog.isCloseable && (
+            <Button
+              style={ButtonStyle.Close}
+              autoWidth={false}
+              onClick={close}
+              className={styles.Close}
+            />
+          )}
+          {lastContent.current}
+        </Panel>
       </div>
     </div>
   );

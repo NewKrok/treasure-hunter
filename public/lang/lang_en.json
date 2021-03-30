@@ -1,6 +1,7 @@
 {
   "not-logged-in": "You are not logged in yet.",
   "sign-in": "Login",
+  "sign-out": "Logout",
   "sign-up": "Sign up",
   "play-as-guest": "Play as Guest",
   "email": "Your e-mail address",
@@ -8,6 +9,8 @@
   "password": "Your password",
   "password-confirmation": "Password confirmation",
   "or": "or",
+  "your-profile": "Your Profile",
+  "cancel": "Canel",
   "menu": "Menu",
   "news": "News",
   "single-player": "Single Player",

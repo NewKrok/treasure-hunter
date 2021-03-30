@@ -1,12 +1,13 @@
 import {
   selectSinglePlayerLevel,
-  setLevelProgressDatas,
+  setLocalLevelProgressData,
+  overrideLocalLevelProgressData,
 } from "../actions/single-player-action";
 
 const initialState = {
   selectedAreaId: 0,
   selectedLevelId: 0,
-  levelProgressDatas: [],
+  levelProgressData: {},
 };
 
 const selectSinglePlayerLevelHandler = ({
@@ -17,17 +18,36 @@ const selectSinglePlayerLevelHandler = ({
   selectedLevelId,
 });
 
-const setLevelProgressDatasHandler = ({
+const setLocalLevelProgressDataHandler = ({
   state,
-  payload: levelProgressDatas,
+  payload: { areaId, levelId, data },
 }) => ({
   ...state,
-  levelProgressDatas,
+  levelProgressData: {
+    ...state.levelProgressData,
+    [areaId]: {
+      ...[state.levelProgressData?.[areaId] || {}],
+      [levelId]: {
+        ...[state.levelProgressData?.[areaId]?.[levelId] || {}],
+        data,
+      },
+    },
+  },
+});
+
+const overrideLocalLevelProgressDataHandler = ({
+  state,
+  payload: levelProgressData,
+}) => ({
+  ...state,
+  levelProgressData,
 });
 
 const configMap = {
   [selectSinglePlayerLevel().type]: selectSinglePlayerLevelHandler,
-  [setLevelProgressDatas().type]: setLevelProgressDatasHandler,
+  [overrideLocalLevelProgressData()
+    .type]: overrideLocalLevelProgressDataHandler,
+  [setLocalLevelProgressData().type]: setLocalLevelProgressDataHandler,
 };
 
 const singlePlayerReducer = (state = initialState, action) => {

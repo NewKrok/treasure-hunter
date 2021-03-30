@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { FormattedMessage } from "react-intl";
 
 import { GetSinglePlayerLevelProgressData } from "../../../../../../store/selectors/single-player-selector";
@@ -8,9 +9,12 @@ import LockImage from "../../../../../../asset/img/stage-lock-icon-key.png";
 
 import styles from "./level-button.module.scss";
 
-const LevelButton = ({ levelId, areaId, selected, onSelect }) => {
-  const { levelName } = GetSinglePlayerLevelDetails({ levelId, areaId });
-  const { isUnlocked } = GetSinglePlayerLevelProgressData({ levelId, areaId });
+const LevelButton = ({ areaId, levelId, selected, onSelect }) => {
+  const { levelName } = GetSinglePlayerLevelDetails({ areaId, levelId });
+
+  const { isUnlocked } = useSelector(
+    GetSinglePlayerLevelProgressData({ areaId, levelId })
+  );
 
   return (
     <div

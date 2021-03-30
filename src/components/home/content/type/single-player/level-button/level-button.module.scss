@@ -6,6 +6,10 @@
   border-image-repeat: round;
   cursor: pointer;
   user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 3px;
 
   &:hover {
     filter: brightness(1.5);

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { startSession } from "../../../../store/actions/session-action";
 import { GetSelectedDialogId } from "../../../../store/selectors/dialog";
 import Button, { ButtonStyle } from "../../../ui/button/button";
-import { DIALOG_ID } from "../../dialog";
+import { DialogId } from "../../dialog";
 import SimpleDialog from "../simple-dialog/simple-dialog";
 
 import styles from "../simple-dialog/simple-dialog.module.scss";
@@ -13,7 +13,7 @@ const StartSession = ({ close }) => {
   const dispatch = useDispatch();
   const user = null; //usesleector
   const dialogId = useSelector(GetSelectedDialogId);
-  const isItTheActiveDialog = dialogId === DIALOG_ID.START_SESSION;
+  const isItTheActiveDialog = dialogId === DialogId.START_SESSION;
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [selectedMicrophone, setSelectedMicrophone] = useState(null);
 

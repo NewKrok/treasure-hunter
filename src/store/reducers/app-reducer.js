@@ -1,4 +1,4 @@
-import { setUser } from "../actions/auth";
+import { setUser } from "../actions/auth-action";
 import {
   changeSiteLanguage,
   saveSiteTranslationData,

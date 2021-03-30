@@ -6,7 +6,7 @@ import {
   clearSignInError,
   signInRequest,
   guestSignInRequest,
-} from "../../../store/actions/auth";
+} from "../../../store/actions/auth-action";
 import Button, { ButtonStyle } from "../../ui/button/button";
 import {
   GetIsSignInInProgress,

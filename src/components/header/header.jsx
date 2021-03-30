@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import Button, { ButtonStyle } from "../form/button/button";
 import SiteLanguageSelector from "./site-language-selector/site-language-selector";
-import { signOutRequest } from "../../store/actions/auth";
+import { signOutRequest } from "../../store/actions/auth-action";
 
 import styles from "./header.module.scss";
 import CounterNotification from "../form/counter-notification/counter-notification";

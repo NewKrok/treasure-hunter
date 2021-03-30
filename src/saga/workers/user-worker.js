@@ -2,7 +2,7 @@ import { select, delay, put } from "redux-saga/effects";
 import firebase from "firebase/app";
 
 import { emailChanged } from "../../store/actions/user-action";
-import { USERS } from "../../common/database/database";
+import { PROFILES } from "../../common/database/database";
 import { GetUser } from "../../store/selectors/auth-selector";
 import { closeDialog } from "../../store/actions/dialog-action";
 
@@ -17,7 +17,7 @@ export function* changeDisplayNameHandler({ payload: displayName }) {
   );
 
   if (isSucceeded) {
-    const ref = firebase.database().ref(`${USERS}/${user.key}/`);
+    const ref = firebase.database().ref(`${PROFILES}/${user.key}/`);
     ref.update({
       displayName,
       lastModificationDate: Date.now(),
@@ -36,7 +36,7 @@ export function* changeEmailHandler({ payload: email }) {
   );
 
   if (isSucceeded) {
-    const ref = firebase.database().ref(`${USERS}/${user.key}/`);
+    const ref = firebase.database().ref(`${PROFILES}/${user.key}/`);
     ref.update({
       email,
       lastModificationDate: Date.now(),
@@ -57,7 +57,7 @@ export function* changePhotoURLHandler({ payload: photoURL }) {
   );
 
   if (isSucceeded) {
-    const ref = firebase.database().ref(`${USERS}/${user.key}/`);
+    const ref = firebase.database().ref(`${PROFILES}/${user.key}/`);
     ref.update({
       photoURL,
       lastModificationDate: Date.now(),

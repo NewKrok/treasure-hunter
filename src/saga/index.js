@@ -6,6 +6,7 @@ import UserSaga from "./user-saga";
 import SiteLanguage from "./site-language";
 import SessionSaga from "./online/session-saga";
 import AppSaga from "./app-saga";
+import SinglePlayerSaga from "./single-player-saga";
 
 function* initialCall() {
   yield put(initApp());
@@ -18,6 +19,7 @@ function* Index() {
     ...SiteLanguage,
     ...SessionSaga,
     ...AppSaga,
+    ...SinglePlayerSaga,
   ]);
   yield call(initialCall);
 }

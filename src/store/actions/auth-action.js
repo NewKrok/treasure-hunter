@@ -27,3 +27,6 @@ export const clearSignInError = createAction({
 export const setUser = createAction({
   type: "SET_USER",
 });
+export const setProfile = createAction({
+  type: "SET_PROFILE",
+});

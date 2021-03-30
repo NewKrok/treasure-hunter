@@ -18,11 +18,10 @@ export const GetSelectedSinglePlayerLevelDetails = (state) => {
 
 export const GetSinglePlayerLevelProgressData = ({ areaId, levelId }) => (
   state
-) => {
-  state.singlePlayerReducer.levelProgressDatas.find(
-    (data) => data.areaId === areaId && data.levelId === levelId
-  );
-};
+) =>
+  state.singlePlayerReducer.levelProgressData?.[areaId]?.[levelId] || {
+    isUnlocked: false,
+  };
 
 export const GetSelectedSinglePlayerAreaDetails = (state) => {
   const areaId = GetSelectedSinglePlayerAreaId(state);

@@ -6,7 +6,7 @@ import {
   signInRequest,
   signOutRequest,
   signUpRequest,
-} from "../store/actions/auth";
+} from "../store/actions/auth-action";
 import {
   initAppHandler,
   signUpRequestHandler,
