@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -13,11 +12,11 @@ import {
   GetSignInError,
 } from "../../../store/selectors/auth-selector";
 
-import TextInput from "../../ui/text-input/text-input";
+import TextInput, { InputError } from "../../ui/text-input/text-input";
 import Panel from "../../ui/panel/panel";
 
-import EmailIcon from "../../../asset/img/input_field_icon_email.png";
-import PasswordIcon from "../../../asset/img/input_field_icon_pw.png";
+import EmailIcon from "../../../asset/img/input-field-icon-email.png";
+import PasswordIcon from "../../../asset/img/input-field-icon-pw.png";
 
 import styles from "../auth.module.scss";
 import { FormattedMessage } from "react-intl";
@@ -25,8 +24,9 @@ import { FormattedMessage } from "react-intl";
 const SignIn = () => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [password, setPassword] = useState("");
-  const { trigger, getValues, clearErrors, errors } = useForm();
+  const [passwordError, setPasswordError] = useState("");
   const signInError = useSelector(GetSignInError);
   const isSignInInProgress = useSelector(GetIsSignInInProgress);
   const hasEmailError = [
@@ -34,21 +34,15 @@ const SignIn = () => {
     "auth/too-many-requests",
   ].includes(signInError?.code);
   const clearEmailError = () => {
-    clearErrors(["email"]);
     if (hasEmailError) dispatch(clearSignInError());
   };
 
   const hasPasswordError = signInError?.code === "auth/wrong-password";
   const clearPasswordError = () => {
-    clearErrors(["password"]);
     if (hasPasswordError) dispatch(clearSignInError());
   };
 
-  const onSignInRequest = () => {
-    trigger().then((isSuccess) => {
-      if (isSuccess) dispatch(signInRequest(getValues()));
-    });
-  };
+  const onSignInRequest = () => dispatch(signInRequest({ email, password }));
 
   const onGuestSignInRequest = () => dispatch(guestSignInRequest());
 
@@ -64,33 +58,45 @@ const SignIn = () => {
             <TextInput
               value={email}
               setValue={setEmail}
+              error={emailError}
+              setError={setEmailError}
               icon={EmailIcon}
               onFocus={clearEmailError}
               placeholder="email"
               autoComplete="treasure-hunter-email"
+              minLength={5}
               maxLength={250}
             />
-            {(errors.email || hasEmailError) && (
-              <span className={styles.InputError}>
-                {signInError?.message || "This field is required"}
-              </span>
+            {(emailError?.isValidated || hasEmailError) && (
+              <div className={styles.InputError}>
+                {signInError?.message ||
+                emailError.type === InputError.MIN_LENGTH
+                  ? "Too short, it has to be at least 5 characters"
+                  : "This field is required"}
+              </div>
             )}
           </div>
           <div className={styles.InputBlock}>
             <TextInput
               value={password}
               setValue={setPassword}
+              error={passwordError}
+              setError={setPasswordError}
               icon={PasswordIcon}
               onFocus={clearPasswordError}
               type="password"
               placeholder="password"
               autoComplete="treasure-hunter-password"
               maxLength={100}
+              maxLength={100}
             />
-            {(errors.password || hasPasswordError) && (
-              <span className={styles.InputError}>
-                {signInError?.message || "This field is required"}
-              </span>
+            {(passwordError?.isValidated || hasPasswordError) && (
+              <div className={styles.InputError}>
+                {signInError?.message ||
+                passwordError.type === InputError.MIN_LENGTH
+                  ? "Too short, it has to be at least 6 characters"
+                  : "This field is required"}
+              </div>
             )}
           </div>
         </div>
@@ -101,6 +107,7 @@ const SignIn = () => {
             style={ButtonStyle.Secondary}
             isLoading={isSignInInProgress}
             autoWidth={false}
+            isEnabled={!emailError && !passwordError}
           />
           <span>
             <FormattedMessage id="or" />

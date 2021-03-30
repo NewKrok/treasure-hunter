@@ -41,6 +41,22 @@
   .WithIcon {
     padding-left: 2.5em;
   }
+
+  .Error {
+    border-width: 8px 8px 8px 8px;
+    border-style: solid;
+    border-image: url("../../../asset/img/input-field-bg-error.png");
+    border-image-slice: 19 19 19 19 fill;
+    border-image-repeat: round;
+    padding-right: 1.5em;
+  }
+
+  .ErrorIcon {
+    left: initial;
+    right: 1em;
+    opacity: 1;
+    width: auto;
+  }
 }
 
 .Empty {

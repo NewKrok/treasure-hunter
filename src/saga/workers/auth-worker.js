@@ -35,17 +35,15 @@ export function* signUpRequestHandler(action) {
   const { email, password, displayName } = action.payload;
 
   try {
-    const { user } = yield rsf.auth.createUserWithEmailAndPassword(
-      email,
-      password
-    );
+    const { user } = yield firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password);
 
     const userData = {
       uid: user.uid,
       displayName,
     };
-    yield call(rsf.auth.updateProfile, userData);
-    yield call(rsf.database.create, PROFILES, userData);
+    yield firebase.auth().currentUser.updateProfile(userData);
     profileDatabaseRef = firebase.database().ref(`${PROFILES}/${user.uid}`);
     const profile = {
       displayName,
@@ -53,7 +51,7 @@ export function* signUpRequestHandler(action) {
       isPublic: false,
       selectedCharacterId: 0,
     };
-    profileDatabaseRef.set(profile);
+    yield profileDatabaseRef.set(profile);
     yield put(setUser(user));
     yield call(unlockArea, 0);
     yield put(setProfile(profile));
@@ -84,7 +82,7 @@ export function* signOutRequestHandler() {
 }
 
 export function* guestSignInRequestHandler() {
-  const { user } = yield rsf.auth.signInAnonymously();
+  const { user } = yield firebase.auth().signInAnonymously();
   yield put(setUser(user));
 
   profileDatabaseRef = firebase.database().ref(`${PROFILES}/${user.uid}`);
@@ -94,7 +92,7 @@ export function* guestSignInRequestHandler() {
     isPublic: false,
     selectedCharacterId: 0,
   };
-  profileDatabaseRef.set(profile);
+  yield profileDatabaseRef.set(profile);
   yield call(unlockArea, 0);
   yield put(setProfile(profile));
 }
