@@ -2,14 +2,9 @@ import React, { useEffect, useRef } from "react";
 import { useIntl } from "react-intl";
 
 import ErrorIcon from "../../../asset/img/input-field-icon-error.png";
+import InputError, { InputErrorType } from "../input-error/input-error";
 
 import styles from "./text-input.module.scss";
-
-export const InputError = {
-  NOT_VALIDATED_YET: "NOT_VALIDATED_YET",
-  MIN_LENGTH: "MIN_LENGTH",
-  VALIDATION: "VALIDATION",
-};
 
 const TextInput = ({
   className = null,
@@ -20,8 +15,9 @@ const TextInput = ({
   onBlur = null,
   value,
   setValue,
-  error,
-  setError,
+  validationResult,
+  setValidationResult,
+  customValidation = null,
   icon = "",
   autoComplete = "on",
   onKeyDown,
@@ -29,30 +25,53 @@ const TextInput = ({
   setInsertValue = null,
   minLength = null,
   maxLength = null,
-  validation = null,
 }) => {
   const input = useRef();
   const formattedPlaceholder = useIntl().formatMessage({ id: placeholder });
 
+  const validate = () => {
+    const customValidationResult = customValidation && customValidation(value);
+
+    if (customValidationResult && !customValidationResult.isValid) {
+      return {
+        isValidated: true,
+        isValid: false,
+        type: InputErrorType.CUSTOM,
+        ...customValidationResult,
+      };
+    }
+    if (minLength && value.length === 0) {
+      return {
+        isValidated: true,
+        isValid: false,
+        type: InputErrorType.EMPTY,
+      };
+    } else if (minLength && value.length < minLength) {
+      return {
+        isValidated: true,
+        isValid: false,
+        type: InputErrorType.MIN_LENGTH,
+        values: { minLength },
+      };
+    }
+
+    return { isValidated: true, isValid: true };
+  };
+
   const onBlurHandler = (e) => {
     if (onBlur) onBlur(e);
 
-    if (validation && !validation(value)) {
-      setError({ isValidated: true, type: InputError.VALIDATION });
-      return;
-    }
-    if (minLength && value.length < minLength) {
-      setError({ isValidated: true, type: InputError.MIN_LENGTH });
-      return;
-    }
-
-    setError(null);
+    setValidationResult(validate());
   };
 
   const onFocusHandler = (e) => {
     if (onFocus) onFocus(e);
 
-    setError({ isValidated: false, type: InputError.NOT_VALIDATED_YET });
+    setValidationResult({
+      isValidated: true,
+      isValid: false,
+      type: InputErrorType.NOT_VALIDATED_YET,
+    });
   };
 
   useEffect(() => {
@@ -70,37 +89,59 @@ const TextInput = ({
   }, [value, setValue, insertValue, setInsertValue]);
 
   useEffect(() => {
-    setError &&
-      setError({ isValidated: false, type: InputError.NOT_VALIDATED_YET });
-  }, [setError]);
+    setValidationResult &&
+      setValidationResult({
+        isValidated: false,
+        isValid: false,
+        type: InputErrorType.NOT_VALIDATED_YET,
+      });
+  }, [setValidationResult]);
+
+  useEffect(() => {
+    const preValidationResult = validate();
+    if (validationResult.isValid || preValidationResult.isValid)
+      setValidationResult(preValidationResult);
+  }, [value]);
 
   return (
-    <div
-      className={`${styles.Wrapper} ${
-        value === "" && styles.Empty
-      } ${className}`}
-    >
-      {icon && <img src={icon} alt="button icon" />}
-      <input
-        ref={input}
-        name={name}
-        placeholder={formattedPlaceholder}
-        type={type}
-        onFocus={onFocusHandler}
-        onBlur={onBlurHandler}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        className={`${icon && styles.WithIcon} ${
-          error?.isValidated && styles.Error
-        }`}
-        autoComplete={autoComplete}
-        onKeyDown={onKeyDown}
-        maxLength={maxLength}
-      />
-      {error?.isValidated && (
-        <img src={ErrorIcon} alt="error icon" className={styles.ErrorIcon} />
-      )}
-    </div>
+    <>
+      <div
+        className={`${styles.Wrapper} ${
+          value === "" && styles.Empty
+        } ${className}`}
+      >
+        {icon && <img src={icon} alt="button icon" />}
+        <input
+          ref={input}
+          name={name}
+          placeholder={formattedPlaceholder}
+          type={type}
+          onFocus={onFocusHandler}
+          onBlur={onBlurHandler}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className={`${icon && styles.WithIcon} ${
+            validationResult?.isValidated &&
+            !validationResult?.isValid &&
+            validationResult.type !== InputErrorType.NOT_VALIDATED_YET &&
+            styles.Error
+          }`}
+          autoComplete={autoComplete}
+          onKeyDown={onKeyDown}
+          maxLength={maxLength}
+        />
+        {validationResult?.isValidated &&
+          !validationResult?.isValid &&
+          validationResult.type !== InputErrorType.NOT_VALIDATED_YET && (
+            <img
+              src={ErrorIcon}
+              alt="error icon"
+              className={styles.ErrorIcon}
+            />
+          )}
+      </div>
+      <InputError validationResult={validationResult} />
+    </>
   );
 };
 

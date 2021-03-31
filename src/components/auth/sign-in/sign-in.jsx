@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -12,7 +12,7 @@ import {
   GetSignInError,
 } from "../../../store/selectors/auth-selector";
 
-import TextInput, { InputError } from "../../ui/text-input/text-input";
+import TextInput from "../../ui/text-input/text-input";
 import Panel from "../../ui/panel/panel";
 
 import EmailIcon from "../../../asset/img/input-field-icon-email.png";
@@ -20,17 +20,23 @@ import PasswordIcon from "../../../asset/img/input-field-icon-pw.png";
 
 import styles from "../auth.module.scss";
 import { FormattedMessage } from "react-intl";
+import { InputErrorType } from "../../ui/input-error/input-error";
 
 const SignIn = () => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [emailValidationResult, setEmailValidationResult] = useState({
+    isValid: false,
+  });
   const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [passwordValidationResult, setPasswordValidationResult] = useState({
+    isValid: false,
+  });
   const signInError = useSelector(GetSignInError);
   const isSignInInProgress = useSelector(GetIsSignInInProgress);
   const hasEmailError = [
     "auth/user-not-found",
+    "auth/invalid-email",
     "auth/too-many-requests",
   ].includes(signInError?.code);
   const clearEmailError = () => {
@@ -50,6 +56,23 @@ const SignIn = () => {
     if (e.keyCode === 13) onSignInRequest();
   };
 
+  useEffect(() => {
+    if (hasEmailError && emailValidationResult.isValidated)
+      setEmailValidationResult({
+        isValidated: true,
+        isValid: false,
+        type: InputErrorType.CUSTOM,
+        message: signInError?.code.replace("auth/", ""),
+      });
+    else if (hasPasswordError && passwordValidationResult.isValidated)
+      setPasswordValidationResult({
+        isValidated: true,
+        isValid: false,
+        type: InputErrorType.CUSTOM,
+        message: signInError?.code.replace("auth/", ""),
+      });
+  }, [signInError]);
+
   return (
     <Panel className={styles.Wrapper} label="sign-in">
       <form className={styles.Form} onKeyDown={onFormKeyDown}>
@@ -58,46 +81,35 @@ const SignIn = () => {
             <TextInput
               value={email}
               setValue={setEmail}
-              error={emailError}
-              setError={setEmailError}
+              validationResult={emailValidationResult}
+              setValidationResult={setEmailValidationResult}
               icon={EmailIcon}
               onFocus={clearEmailError}
               placeholder="email"
               autoComplete="treasure-hunter-email"
               minLength={5}
               maxLength={250}
+              customValidation={(value) => ({
+                isValid: value !== "" && !hasEmailError,
+                isValidated: true,
+                message: "invalid-email",
+              })}
             />
-            {(emailError?.isValidated || hasEmailError) && (
-              <div className={styles.InputError}>
-                {signInError?.message ||
-                emailError.type === InputError.MIN_LENGTH
-                  ? "Too short, it has to be at least 5 characters"
-                  : "This field is required"}
-              </div>
-            )}
           </div>
           <div className={styles.InputBlock}>
             <TextInput
               value={password}
               setValue={setPassword}
-              error={passwordError}
-              setError={setPasswordError}
+              validationResult={passwordValidationResult}
+              setValidationResult={setPasswordValidationResult}
               icon={PasswordIcon}
               onFocus={clearPasswordError}
               type="password"
               placeholder="password"
               autoComplete="treasure-hunter-password"
-              maxLength={100}
+              minLength={6}
               maxLength={100}
             />
-            {(passwordError?.isValidated || hasPasswordError) && (
-              <div className={styles.InputError}>
-                {signInError?.message ||
-                passwordError.type === InputError.MIN_LENGTH
-                  ? "Too short, it has to be at least 6 characters"
-                  : "This field is required"}
-              </div>
-            )}
           </div>
         </div>
         <div className={styles.ActionArea}>
@@ -107,7 +119,9 @@ const SignIn = () => {
             style={ButtonStyle.Secondary}
             isLoading={isSignInInProgress}
             autoWidth={false}
-            isEnabled={!emailError && !passwordError}
+            isEnabled={
+              emailValidationResult.isValid && passwordValidationResult.isValid
+            }
           />
           <span>
             <FormattedMessage id="or" />
