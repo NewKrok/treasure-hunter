@@ -13,7 +13,7 @@ let perspectiveCamera;
 
 export const createCamera = () => {
   perspectiveCamera = new PerspectiveCamera(
-    55,
+    35,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
@@ -35,7 +35,7 @@ export const updateCamera = (delta) => {
     const intersects = raycaster.intersectObjects(cameraColliders);
 
     if (intersects.length > 0) {
-      let distance = 6;
+      let distance = 4;
       for (let i = 0; i < intersects.length; i++) {
         distance =
           intersects[i].distance < distance ? intersects[i].distance : distance;

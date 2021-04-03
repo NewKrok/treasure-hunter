@@ -58,9 +58,12 @@ import {
   setCameraPosition,
   updateCamera,
   setCameraTarget,
-  getTPSCameraRotation,
   updateTPSCameraRotation,
 } from "./src/camera.js";
+import {
+  setPlayerControllerTarget,
+  updatePlayerController,
+} from "./src/control/player-controller.js";
 
 const USE_DEBUG_RENDERER = false;
 let debugRenderer = null;
@@ -483,6 +486,7 @@ const animate = () => {
   const user = users?.[0];
 
   updateUnitController();
+  updatePlayerController({ now, delta });
   updateParticleSystems({ delta, elapsed });
 
   chests.forEach((chest) => {
@@ -616,179 +620,6 @@ const animate = () => {
         );
         users[0].shimmyVelocity = velocity;
       }
-    } else {
-      users[0].isClimbingUp = false;
-      users[0].shimmyVelocity = 0;
-      const cameraRotation = getTPSCameraRotation();
-      if (now - users[0].climbEndTime > 400) {
-        velocity = 0.0;
-        if (unitControllerState.forward.pressed)
-          velocity =
-            (unitControllerState.walk.pressed ? 1 : 3.5) *
-            Math.max(
-              unitControllerState.forward.value,
-              unitControllerState.left.value,
-              unitControllerState.right.value
-            );
-        else if (unitControllerState.backward.pressed)
-          velocity =
-            (unitControllerState.walk.pressed ? -0.75 : -2) *
-            Math.max(
-              unitControllerState.backward.value,
-              unitControllerState.left.value,
-              unitControllerState.right.value
-            );
-        let relativeVector = new CANNON.Vec3(0, 0, velocity * delta);
-
-        if (velocity !== 0) {
-          users[0].targetRotation +=
-            (cameraRotation.x - users[0].targetRotation) / (delta * 1000);
-          users[0].physics.quaternion.setFromAxisAngle(
-            new CANNON.Vec3(0, 1, 0),
-            -users[0].targetRotation
-          );
-        }
-
-        users[0].physics.quaternion.vmult(relativeVector, relativeVector);
-        users[0].physics.position.vadd(
-          relativeVector,
-          users[0].physics.position
-        );
-        users[0].velocity = velocity;
-
-        if (
-          !unitControllerState.forward.pressed &&
-          (unitControllerState.left.pressed ||
-            unitControllerState.right.pressed)
-        ) {
-          users[0].targetRotation +=
-            (cameraRotation.x - users[0].targetRotation) / (delta * 1000);
-          users[0].physics.quaternion.setFromAxisAngle(
-            new CANNON.Vec3(0, 1, 0),
-            -users[0].targetRotation
-          );
-        }
-
-        users[0].turn = 0;
-        if (
-          unitControllerState.forward.pressed ||
-          unitControllerState.backward.pressed
-        ) {
-          if (unitControllerState.left.pressed) {
-            updateTPSCameraRotation({
-              x:
-                -0.02 *
-                unitControllerState.left.value *
-                (unitControllerState.forward.pressed ? 1 : -1),
-            });
-          } else if (unitControllerState.right.pressed) {
-            updateTPSCameraRotation({
-              x:
-                0.02 *
-                unitControllerState.right.value *
-                (unitControllerState.forward.pressed ? 1 : -1),
-            });
-          }
-        } else {
-          if (unitControllerState.left.pressed) {
-            updateTPSCameraRotation({
-              x: -0.03 * unitControllerState.left.value,
-            });
-            users[0].turn = 1;
-          } else if (unitControllerState.right.pressed) {
-            updateTPSCameraRotation({
-              x: 0.03 * unitControllerState.right.value,
-            });
-            users[0].turn = -1;
-          }
-
-          // !!!!!! Sidling
-          /* users[0].isSidling =
-        unitControllerState.left.pressed || unitControllerState.right.pressed;
-
-        const sidlingVelocity = users[0].isStanding
-          ? unitControllerState.walk.pressed
-            ? unitControllerState.backward.pressed
-              ? 0.5
-              : 1.5
-            : unitControllerState.backward.pressed
-            ? 0.5
-            : velocity === 0
-            ? 2.5
-            : 1.5
-          : 2;
-        let sidlingRelativeVector = 0;
-           if (unitControllerState.left.pressed) {
-            if (velocity !== 0 && adventureTPSCamera) {
-              users[0].targetRotation +=
-                (adventureTPSCamera.getXRotation() - users[0].targetRotation) /
-                (delta * 1000);
-              users[0].physics.quaternion.setFromAxisAngle(
-                new CANNON.Vec3(0, 1, 0),
-                -users[0].targetRotation
-              );
-            }
-
-            sidlingRelativeVector = new CANNON.Vec3(
-              sidlingVelocity * delta,
-              0,
-              0
-            );
-            users[0].sidlingDirection = 1;
-            users[0].physics.quaternion.vmult(
-              sidlingRelativeVector,
-              sidlingRelativeVector
-            );
-            users[0].physics.position.vadd(
-              sidlingRelativeVector,
-              users[0].physics.position
-            );
-          } else if (unitControllerState.right.pressed) {
-            sidlingRelativeVector = new CANNON.Vec3(
-              -sidlingVelocity * delta,
-              0,
-              0
-            );
-            users[0].sidlingDirection = -1;
-            users[0].physics.quaternion.vmult(
-              sidlingRelativeVector,
-              sidlingRelativeVector
-            );
-            users[0].physics.position.vadd(
-              sidlingRelativeVector,
-              users[0].physics.position
-            );
-          } */
-        }
-      }
-
-      if (
-        users[0].isJumpTriggered &&
-        isStanding &&
-        Date.now() - users[0].jumpStartTime > 200
-      ) {
-        users[0].isJumpTriggered = false;
-      }
-
-      const hangingInfo = climbableAreas.find(
-        ({ area }) =>
-          unitControllerState.jump.pressed &&
-          now - users[0].cancelHangingTime > 200 &&
-          users[0].object.position.x > area.x + area.min.x - 0.55 &&
-          users[0].object.position.x < area.x + area.max.x + 0.55 &&
-          users[0].object.position.y + 1.5 > area.y + area.min.y &&
-          users[0].object.position.y + 1.5 < area.y + area.max.y &&
-          users[0].object.position.z > area.z + area.min.z - 0.55 &&
-          users[0].object.position.z < area.z + area.max.z + 0.55
-      );
-      users[0].climbingUpDirection = hangingInfo?.direction;
-      users[0].isHanging = hangingInfo;
-      if (hangingInfo) {
-        users[0].physics.quaternion.setFromAxisAngle(
-          new CANNON.Vec3(0, 1, 0),
-          (hangingInfo.direction * Math.PI) / 180
-        );
-      }
     }
 
     stats.update();
@@ -889,6 +720,7 @@ window.createWorld = ({
             rotation: spawnPoints[0].rotation,
             onComplete: (user) => {
               setCameraTarget(user.object);
+              setPlayerControllerTarget(user);
               onUnitControllerAction({
                 action: UnitControllerAction.Jump,
                 callback: () => {

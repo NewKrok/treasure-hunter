@@ -166,7 +166,7 @@ export const updateUnitController = () => {
   if (rightAxisX !== 0 || rightAxisY !== 0)
     trigger({
       action: UnitControllerAction.RotateCamera,
-      value: { x: rightAxisX / 25, y: rightAxisY / 25 },
+      value: { x: rightAxisX / 35, y: rightAxisY / 35 },
     });
 };
 
@@ -190,7 +190,7 @@ export const initUnitController = () => {
   document.addEventListener("mousemove", ({ movementX, movementY }) => {
     trigger({
       action: UnitControllerAction.RotateCamera,
-      value: { x: movementX / 300, y: movementY / 300 },
+      value: { x: movementX / 350, y: movementY / 350 },
     });
   });
 };

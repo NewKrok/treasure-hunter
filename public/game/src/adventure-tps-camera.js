@@ -1,7 +1,7 @@
 import { Vector3, Euler } from "../build/three.module.js";
 
 const AdventureTPSCamera = (camera) => {
-  let target, q, mX, mY, distance;
+  let target, q, mX, mY, distance, lastDistance;
   const currentPosition = new Vector3();
   const currentLookat = new Vector3();
 
@@ -29,20 +29,25 @@ const AdventureTPSCamera = (camera) => {
       q = target.quaternion.clone();
       mX = -new Euler().setFromQuaternion(q).y;
       mY = 2.4;
-      distance = 6;
+      distance = 4;
     },
     update: ({ x, y, delta }) => {
       if (target) {
         if (x || y) {
           mX += x || 0;
           mY += y || 0;
-          mY = Math.max(1.8, mY);
+          mY = Math.max(1.7, mY);
           mY = Math.min(2.7, mY);
           if (x) {
             q.setFromAxisAngle(new Vector3(0, 1, 0), -mX);
           }
         } else if (delta) {
-          const t = 1.0 - Math.pow(0.000001, delta);
+          const t =
+            1.0 -
+            Math.pow(
+              lastDistance > distance ? 0.00000000000000000000001 : 0.001,
+              delta
+            );
 
           const idealOffset = calculateOffset();
           const idealLookat = calculateLookat();
@@ -52,6 +57,8 @@ const AdventureTPSCamera = (camera) => {
 
           camera.position.copy(currentPosition);
           camera.lookAt(currentLookat);
+
+          lastDistance = distance;
         }
       }
     },

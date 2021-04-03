@@ -133,6 +133,7 @@ export const create = ({
           jumpStartTime: 0,
           wasLanded: false,
           landingStartTime: 0,
+          viewRotation: 0,
           targetRotation: 0,
           updatePositions: () => {
             object.position.set(

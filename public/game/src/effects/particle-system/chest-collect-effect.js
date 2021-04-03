@@ -24,16 +24,16 @@ const onUpdate = ({ particleSystem, delta }) => {
       const xVelocity = xVelocityArr[index];
       const yVelocity = yVelocityArr[index];
       const zVelocity = zVelocityArr[index];
-      positionArr[i] += speed * xVelocity;
-      positionArr[i + 1] += speed * yVelocity;
-      positionArr[i + 2] += speed * zVelocity;
+      positionArr[i] += speed * xVelocity * delta;
+      positionArr[i + 1] += speed * yVelocity * delta;
+      positionArr[i + 2] += speed * zVelocity * delta;
 
       opacityArr[index] -= delta * 1.5;
 
       if (speedArr[index] > 0) speedArr[index] *= 1 - delta * 13;
       else speedArr[index] *= 1 + delta * 15;
 
-      if (speedArr[index] > 0 && speedArr[index] < 0.001) {
+      if (speedArr[index] > 0 && speedArr[index] < 0.1) {
         speedArr[index] *= -1.0;
       }
     }
@@ -50,7 +50,7 @@ export const createChestCollectEffect = ({ position }) => {
     y: { min: -0.1, max: 0.1 },
     z: { min: -0.1, max: 0.1 },
   };
-  const speed = { min: 0.08, max: 0.12 };
+  const speed = { min: 8, max: 12 };
   const size = { min: 3.0, max: 10.0 };
   const delay = { min: 0.0, max: 0.25 };
 
