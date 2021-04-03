@@ -41,12 +41,12 @@ import {
 import { createColliderByObject } from "./src/utils/cannon-utils.js";
 
 import {
-  initUnitController,
-  updateUnitController,
-  unitControllerState,
-  onUnitControllerAction,
-  UnitControllerAction,
-} from "./src/control/unit-controller.js";
+  initUnitActions,
+  updateUnitActions,
+  unitActionState,
+  onUnitAction,
+  UnitAction,
+} from "./src/control/unit-action-manager.js";
 import { updateParticleSystems } from "./src/effects/particle-system/particle-defaults.js";
 import { ParticleCollection } from "./src/effects/particle-system/particle-collection.js";
 import { registerDoorElement, updateDoors } from "./src/doors.js";
@@ -61,9 +61,9 @@ import {
   updateTPSCameraRotation,
 } from "./src/camera.js";
 import {
-  setPlayerControllerTarget,
-  updatePlayerController,
-} from "./src/control/player-controller.js";
+  setUnitControllerTarget,
+  updateUnitController,
+} from "./src/control/unit-controller.js";
 
 const USE_DEBUG_RENDERER = false;
 let debugRenderer = null;
@@ -421,7 +421,7 @@ function init() {
   tooltip = document.getElementById("tooltip");
   document.body.appendChild(renderer.domElement);
   window.addEventListener("resize", onWindowResize, false);
-  initUnitController();
+  initUnitActions();
   renderer.domElement.onclick = renderer.domElement.requestPointerLock;
   stats = new Stats();
   document.body.appendChild(stats.dom);
@@ -485,8 +485,8 @@ const animate = () => {
   const users = getUsers();
   const user = users?.[0];
 
-  updateUnitController();
-  updatePlayerController({ now, delta });
+  updateUnitActions();
+  updateUnitController({ now, delta });
   updateParticleSystems({ delta, elapsed });
 
   chests.forEach((chest) => {
@@ -576,7 +576,7 @@ const animate = () => {
           users[0].object.position.z < area.z + area.max.z + 0.5
       );
 
-      if (users[0].canClimbUp && unitControllerState.forward.pressed) {
+      if (users[0].canClimbUp && unitActionState.forward.pressed) {
         if (!users[0].isClimbingUp) {
           users[0].isClimbingUp = true;
           users[0].climbStartTime = now;
@@ -609,9 +609,8 @@ const animate = () => {
 
       if (!users[0].isClimbingUp) {
         velocity = 0.0;
-        if (unitControllerState.left.pressed && canClimbLeft) velocity = 1;
-        else if (unitControllerState.right.pressed && canClimbRight)
-          velocity = -1;
+        if (unitActionState.left.pressed && canClimbLeft) velocity = 1;
+        else if (unitActionState.right.pressed && canClimbRight) velocity = -1;
         let relativeVector = new CANNON.Vec3(velocity * delta, 0, 0);
         users[0].physics.quaternion.vmult(relativeVector, relativeVector);
         users[0].physics.position.vadd(
@@ -654,8 +653,8 @@ const animate = () => {
   requestAnimationFrame(animate);
 };
 
-onUnitControllerAction({
-  action: UnitControllerAction.RotateCamera,
+onUnitAction({
+  action: UnitAction.RotateCamera,
   callback: ({ x, y }) => updateTPSCameraRotation({ x, y }),
 });
 
@@ -720,9 +719,9 @@ window.createWorld = ({
             rotation: spawnPoints[0].rotation,
             onComplete: (user) => {
               setCameraTarget(user.object);
-              setPlayerControllerTarget(user);
-              onUnitControllerAction({
-                action: UnitControllerAction.Jump,
+              setUnitControllerTarget(user);
+              onUnitAction({
+                action: UnitAction.Jump,
                 callback: () => {
                   const now = Date.now();
                   if (user.isStanding) {
@@ -739,8 +738,8 @@ window.createWorld = ({
                   }
                 },
               });
-              onUnitControllerAction({
-                action: UnitControllerAction.Interaction,
+              onUnitAction({
+                action: UnitAction.Interaction,
                 callback: () => {
                   if (selectedChest) {
                     const { object, collider, effect } = selectedChest;

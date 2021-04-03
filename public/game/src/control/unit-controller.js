@@ -1,200 +1,226 @@
-import {
-  ButtonKey,
-  getButtonState,
-  initGamepadManager,
-  updateGamePad,
-} from "./gamepad.js";
+import { getTPSCameraRotation } from "../camera.js";
+import { unitActionState } from "./unit-action-manager.js";
 
-const actionHandlers = [];
+let currentTarget = null;
+let climbableAreas = [];
 
-export const UnitControllerAction = {
-  Forward: "Forward",
-  Backward: "Backward",
-  Left: "Left",
-  Right: "Right",
-  Walk: "Walk",
-  Jump: "Jump",
-  RotateCamera: "RotateCamera",
-  Interaction: "Interaction",
-};
+export const setUnitControllerTarget = (target) => (currentTarget = target);
+export const addClimbableAreas = (areas) => (climbableAreas = areas);
 
-export const unitControllerState = {
-  forward: { pressed: false, value: 0 },
-  backward: { pressed: false, value: 0 },
-  left: { pressed: false, value: 0 },
-  right: { pressed: false, value: 0 },
-  walk: { pressed: false, value: 0 },
-  jump: { pressed: false, value: 0 },
-  interaction: { pressed: false, value: 0 },
-};
+export const updateUnitController = ({ now, delta }) => {
+  if (currentTarget) {
+    const {
+      isHanging,
+      climbEndTime,
+      viewRotation,
+      physics,
+      isJumpTriggered,
+      isStanding,
+      jumpStartTime,
+    } = currentTarget;
+    const { x, y, z } = currentTarget.object.position;
 
-const keys = {
-  a: false,
-  s: false,
-  d: false,
-  w: false,
-  e: false,
-  ArrowUp: false,
-  ArrowDown: false,
-  ArrowLeft: false,
-  ArrowRight: false,
-  shift: false,
-  space: false,
-};
+    if (isHanging) {
+    } else {
+      currentTarget.isClimbingUp = false;
+      currentTarget.shimmyVelocity = 0;
+      const cameraRotation = getTPSCameraRotation();
 
-const trigger = ({ action, value }) => {
-  actionHandlers.forEach(
-    (entry) =>
-      entry.action === action &&
-      (value ? entry.callback(value) : entry.callback())
-  );
-};
+      if (now - climbEndTime > 400) {
+        const verticalVelocity =
+          Math.max(
+            unitActionState.backward.value,
+            unitActionState.forward.value
+          ) *
+          (unitActionState.backward.value > unitActionState.forward.value
+            ? -1
+            : 1);
 
-const calculateState = ({
-  prevState,
-  axis,
-  keys,
-  gamePadButton,
-  action,
-  axisValidator = (v) => v != 0,
-  axisValueModifier = (v) => v,
-}) => {
-  const axisValue = axis ? getButtonState(axis).value : 0;
-  const validatedAxisValue = axis ? axisValidator(axisValue) : false;
-  const pressed = keys.includes(true) || getButtonState(gamePadButton).pressed;
-  const value = validatedAxisValue
-    ? axisValueModifier(axisValue)
-    : pressed
-    ? 1
-    : 0;
-  const newState = {
-    pressed: pressed || validatedAxisValue,
-    value,
-  };
+        const horizontalVelocity =
+          Math.max(unitActionState.left.value, unitActionState.right.value) *
+          (unitActionState.left.value > unitActionState.right.value ? 1 : -1);
 
-  if (newState.pressed && newState.pressed != prevState.pressed)
-    trigger({ action, value });
+        const velocity =
+          (unitActionState.walk.pressed ? 1 : 4.5) *
+          Math.max(
+            unitActionState.forward.value,
+            unitActionState.backward.value,
+            unitActionState.left.value,
+            unitActionState.right.value
+          );
+        let velocityMultiplier = 1;
 
-  return newState;
-};
+        if (velocity !== 0) {
+          let targetRotation =
+            cameraRotation.x +
+            Math.PI / 2 +
+            Math.PI +
+            Math.atan2(verticalVelocity, horizontalVelocity);
+          let newViewRotation = viewRotation;
+          if (newViewRotation < 0) newViewRotation += Math.PI * 2;
+          let diff = targetRotation - newViewRotation;
 
-const updateForwardState = () => {
-  unitControllerState.forward = calculateState({
-    prevState: unitControllerState.forward,
-    axis: ButtonKey.LeftAxisY,
-    axisValidator: (v) => v < -0.1,
-    axisValueModifier: (v) => v * -1,
-    keys: [keys.w || keys.ArrowUp],
-    gamePadButton: ButtonKey.Up,
-    action: UnitControllerAction.Forward,
-  });
-};
+          while (Math.abs(diff) > Math.PI) {
+            if (targetRotation < newViewRotation) {
+              if (targetRotation === 0) targetRotation = Math.PI * 2;
+              else targetRotation += Math.PI * 2;
 
-const updateBackwardState = () => {
-  unitControllerState.backward = calculateState({
-    prevState: unitControllerState.backward,
-    axis: ButtonKey.LeftAxisY,
-    axisValidator: (v) => v > 0.1,
-    keys: [keys.s || keys.ArrowDown],
-    gamePadButton: ButtonKey.Down,
-    action: UnitControllerAction.Backward,
-  });
-};
+              if (targetRotation >= Math.PI * 4) {
+                targetRotation -= Math.PI * 4;
+                newViewRotation -= Math.PI * 4;
+              }
+            } else {
+              newViewRotation += Math.PI * 2;
+            }
+            diff = targetRotation - newViewRotation;
+          }
+          currentTarget.viewRotation += diff * (delta / 0.1);
+          currentTarget.targetRotation = targetRotation;
 
-const updateLeftState = () => {
-  unitControllerState.left = calculateState({
-    prevState: unitControllerState.left,
-    axis: ButtonKey.LeftAxisX,
-    axisValidator: (v) => v < -0.1,
-    axisValueModifier: (v) => v * -1,
-    keys: [keys.a || keys.ArrowLeft],
-    gamePadButton: ButtonKey.Left,
-    action: UnitControllerAction.Left,
-  });
-};
+          physics.quaternion.setFromAxisAngle(
+            new CANNON.Vec3(0, 1, 0),
+            -currentTarget.viewRotation
+          );
 
-const updateRightState = () => {
-  unitControllerState.right = calculateState({
-    prevState: unitControllerState.right,
-    axis: ButtonKey.LeftAxisX,
-    axisValidator: (v) => v > 0.1,
-    keys: [keys.d || keys.ArrowRight],
-    gamePadButton: ButtonKey.Right,
-    action: UnitControllerAction.Right,
-  });
-};
+          let normalizedDiff = Math.abs(diff);
+          normalizedDiff -= normalizedDiff > Math.PI ? Math.PI : 0;
 
-const updateWalkState = () => {
-  unitControllerState.walk = calculateState({
-    prevState: unitControllerState.walk,
-    keys: [keys.shift],
-    action: UnitControllerAction.Walk,
-  });
-};
+          velocityMultiplier =
+            normalizedDiff > 0.9 ? 0 : (Math.PI - normalizedDiff) / Math.PI;
 
-const updateJumpState = () => {
-  unitControllerState.jump = calculateState({
-    prevState: unitControllerState.jump,
-    keys: [keys.space],
-    gamePadButton: ButtonKey.ActionBottom,
-    action: UnitControllerAction.Jump,
-  });
-};
+          let relativeVector = new CANNON.Vec3(
+            Math.sin(Math.PI * 2 - targetRotation) *
+              velocity *
+              velocityMultiplier *
+              delta,
+            0,
+            Math.cos(Math.PI * 2 - targetRotation) *
+              velocity *
+              velocityMultiplier *
+              delta
+          );
+          physics.position.vadd(relativeVector, physics.position);
+        }
 
-const updateInteractionState = () => {
-  unitControllerState.interaction = calculateState({
-    prevState: unitControllerState.interaction,
-    keys: [keys.e],
-    gamePadButton: ButtonKey.ActionLeft,
-    action: UnitControllerAction.Interaction,
-  });
-};
+        currentTarget.velocity = velocity;
+        currentTarget.turn = 0;
 
-export const updateUnitController = () => {
-  updateGamePad();
+        if (
+          unitActionState.forward.pressed ||
+          unitActionState.backward.pressed
+        ) {
+          /* if (unitActionState.left.pressed) {
+            updateTPSCameraRotation({
+              x:
+                -0.01 *
+                unitActionState.left.value *
+                (unitActionState.forward.pressed ? 1 : -1),
+            });
+          } else if (unitActionState.right.pressed) {
+            updateTPSCameraRotation({
+              x:
+                0.01 *
+                unitActionState.right.value *
+                (unitActionState.forward.pressed ? 1 : -1),
+            });
+          } */
+        } else {
+          /*  if (unitActionState.left.pressed) {
+            updateTPSCameraRotation({
+              x: -0.03 * unitActionState.left.value,
+            });
+            users[0].turn = 1;
+          } else if (unitActionState.right.pressed) {
+            updateTPSCameraRotation({
+              x: 0.03 * unitActionState.right.value,
+            });
+            users[0].turn = -1;
+          } */
+          // !!!!!! Sidling
+          /* users[0].isSidling =
+            unitActionState.left.pressed ||
+            unitActionState.right.pressed;
 
-  updateForwardState();
-  updateBackwardState();
-  updateLeftState();
-  updateRightState();
-  updateWalkState();
-  updateJumpState();
-  updateInteractionState();
+          const sidlingVelocity = users[0].isStanding
+            ? unitActionState.walk.pressed
+              ? unitActionState.backward.pressed
+                ? 0.5
+                : 1.5
+              : unitActionState.backward.pressed
+              ? 0.5
+              : velocity === 0
+              ? 2.5
+              : 1.5
+            : 2;
+          let sidlingRelativeVector = 0;
+          if (unitActionState.left.pressed) {
+            if (velocity !== 0 && adventureTPSCamera) {
+              users[0].targetRotation +=
+                (adventureTPSCamera.getXRotation() - users[0].targetRotation) /
+                (delta * 1000);
+              users[0].physics.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(0, 1, 0),
+                -users[0].targetRotation
+              );
+            }
 
-  const rightAxisX = getButtonState(ButtonKey.RightAxisX).value;
-  const rightAxisY = getButtonState(ButtonKey.RightAxisY).value;
-  if (rightAxisX !== 0 || rightAxisY !== 0)
-    trigger({
-      action: UnitControllerAction.RotateCamera,
-      value: { x: rightAxisX / 35, y: rightAxisY / 35 },
-    });
-};
+            sidlingRelativeVector = new CANNON.Vec3(
+              sidlingVelocity * delta,
+              0,
+              0
+            );
+            users[0].sidlingDirection = 1;
+            users[0].physics.quaternion.vmult(
+              sidlingRelativeVector,
+              sidlingRelativeVector
+            );
+            users[0].physics.position.vadd(
+              sidlingRelativeVector,
+              users[0].physics.position
+            );
+          } else if (unitActionState.right.pressed) {
+            sidlingRelativeVector = new CANNON.Vec3(
+              -sidlingVelocity * delta,
+              0,
+              0
+            );
+            users[0].sidlingDirection = -1;
+            users[0].physics.quaternion.vmult(
+              sidlingRelativeVector,
+              sidlingRelativeVector
+            );
+            users[0].physics.position.vadd(
+              sidlingRelativeVector,
+              users[0].physics.position
+            );
+          }*/
+        }
+      }
 
-const getCharKey = (char) => {
-  let key = char.toLowerCase();
-  key = key === " " ? "space" : key;
-  return key;
-};
+      if (isJumpTriggered && isStanding && now - jumpStartTime > 200) {
+        currentTarget.isJumpTriggered = false;
+      }
 
-export const initUnitController = () => {
-  initGamepadManager();
+      const hangingInfo = climbableAreas.find(
+        ({ area }) =>
+          unitActionState.jump.pressed &&
+          now - users[0].cancelHangingTime > 200 &&
+          x > area.x + area.min.x - 0.55 &&
+          x < area.x + area.max.x + 0.55 &&
+          y + 1.5 > area.y + area.min.y &&
+          y + 1.5 < area.y + area.max.y &&
+          z > area.z + area.min.z - 0.55 &&
+          z < area.z + area.max.z + 0.55
+      );
+      currentTarget.climbingUpDirection = hangingInfo?.direction;
+      currentTarget.isHanging = hangingInfo;
 
-  document.body.addEventListener("keydown", (e) => {
-    const key = getCharKey(e.key);
-    if (keys[key] !== undefined) keys[key] = true;
-  });
-  document.body.addEventListener("keyup", (e) => {
-    const key = getCharKey(e.key);
-    if (keys[key] !== undefined) keys[key] = false;
-  });
-  document.addEventListener("mousemove", ({ movementX, movementY }) => {
-    trigger({
-      action: UnitControllerAction.RotateCamera,
-      value: { x: movementX / 350, y: movementY / 350 },
-    });
-  });
-};
-
-export const onUnitControllerAction = ({ action, callback }) => {
-  actionHandlers.push({ action, callback });
+      if (hangingInfo) {
+        physics.quaternion.setFromAxisAngle(
+          new CANNON.Vec3(0, 1, 0),
+          (hangingInfo.direction * Math.PI) / 180
+        );
+      }
+    }
+  }
 };
