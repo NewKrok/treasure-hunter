@@ -27,26 +27,30 @@ export const registerCameraCollider = (collider) =>
 
 export const updateCamera = (delta) => {
   if (adventureTPSCamera) {
-    const userPos = adventureTPSCamera.getTarget().position.clone();
-    userPos.y += 1;
-    const vector = new Vector3(0, 0, 1);
-    vector.applyQuaternion(getCamera().quaternion);
-    const raycaster = new Raycaster(userPos, vector, 0, 10);
-    const intersects = raycaster.intersectObjects(cameraColliders);
+    const targetPos = adventureTPSCamera.getTarget()?.position.clone();
+    if (targetPos) {
+      targetPos.y += 1;
+      const vector = new Vector3(0, 0, 1);
+      vector.applyQuaternion(getCamera().quaternion);
+      const raycaster = new Raycaster(targetPos, vector, 0, 10);
+      const intersects = raycaster.intersectObjects(cameraColliders);
 
-    if (intersects.length > 0) {
-      let distance = 4;
-      for (let i = 0; i < intersects.length; i++) {
-        distance =
-          intersects[i].distance < distance ? intersects[i].distance : distance;
-        distance *= 0.9;
-      }
-      adventureTPSCamera?.setDistance(
-        Math.min(Math.floor(distance * 1000) / 1000, 6)
-      );
-    } else adventureTPSCamera?.setDistance(6);
+      if (intersects.length > 0) {
+        let distance = 4;
+        for (let i = 0; i < intersects.length; i++) {
+          distance =
+            intersects[i].distance < distance
+              ? intersects[i].distance
+              : distance;
+          distance *= 0.9;
+        }
+        adventureTPSCamera?.setDistance(
+          Math.min(Math.floor(distance * 1000) / 1000, 6)
+        );
+      } else adventureTPSCamera?.setDistance(6);
 
-    adventureTPSCamera.update({ delta });
+      adventureTPSCamera.update({ delta });
+    }
   }
 };
 

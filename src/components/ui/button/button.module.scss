@@ -63,6 +63,15 @@
   background-size: 100%;
 }
 
+.PauseButton {
+  @extend .BaseButton;
+
+  width: 52px;
+  height: 58px;
+  background-image: url("../../../asset/img/popup-btn-close.png");
+  background-size: 100%;
+}
+
 .IconMargin {
   margin-right: 10px;
 }

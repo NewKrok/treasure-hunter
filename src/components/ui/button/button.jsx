@@ -12,6 +12,7 @@ const ButtonStyle = {
   Secondary: "Secondary",
   Tertiary: "Tertiary",
   Close: "Close",
+  Pause: "Pause",
 };
 
 const Button = ({
@@ -67,6 +68,9 @@ const Button = ({
       break;
     case ButtonStyle.Close:
       styleClassName = styles.CloseButton;
+      break;
+    case ButtonStyle.Pause:
+      styleClassName = styles.PauseButton;
       break;
     default:
   }

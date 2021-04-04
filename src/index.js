@@ -14,6 +14,7 @@ import sessionReducer from "./store/reducers/session-reducer";
 import dialogReducer from "./store/reducers/dialog-reducer";
 import singlePlayerReducer from "./store/reducers/single-player-reducer";
 import newsReducer from "./store/reducers/news-reducer";
+import gameReducer from "./store/reducers/game-reducer";
 import App from "./App";
 
 import "./config.css";
@@ -40,6 +41,7 @@ const rootReducer = combineReducers({
   dialogReducer,
   singlePlayerReducer,
   newsReducer,
+  gameReducer,
 });
 
 const store = createStore(

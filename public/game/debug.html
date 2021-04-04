@@ -33,27 +33,10 @@
         left: 0;
         top: 0;
       }
-
-      #tooltip {
-        min-width: 10px;
-        min-height: 10px;
-        position: absolute;
-        left: 0;
-        top: 0;
-        background: #00000088;
-        border: 1px solid #ffffff88;
-        z-index: 1;
-        padding: 10px 20px;
-        border-radius: 10px;
-        color: #fff;
-        display: none;
-        transform: translateX(-50%);
-      }
     </style>
   </head>
   <body>
     <canvas id="canvas"></canvas>
-    <div id="tooltip" class="tooltip">Press <b>E</b> to open</div>
     <script>
       setTimeout(() => {
         window.createWorld({

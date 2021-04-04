@@ -16,6 +16,7 @@ export const UnitAction = {
   Jump: "Jump",
   RotateCamera: "RotateCamera",
   Interaction: "Interaction",
+  Pause: "Pause",
 };
 
 export const unitActionState = {
@@ -26,6 +27,7 @@ export const unitActionState = {
   walk: { pressed: false, value: 0 },
   jump: { pressed: false, value: 0 },
   interaction: { pressed: false, value: 0 },
+  pause: { pressed: false, value: 0 },
 };
 
 const keys = {
@@ -34,12 +36,13 @@ const keys = {
   d: false,
   w: false,
   e: false,
-  ArrowUp: false,
-  ArrowDown: false,
-  ArrowLeft: false,
-  ArrowRight: false,
+  arrowup: false,
+  arrowdown: false,
+  arrowleft: false,
+  arrowright: false,
   shift: false,
   space: false,
+  escape: false,
 };
 
 const trigger = ({ action, value }) => {
@@ -54,14 +57,14 @@ const calculateState = ({
   prevState,
   axis,
   keys,
-  gamePadButton,
+  gamepadButton,
   action,
   axisValidator = (v) => v != 0,
   axisValueModifier = (v) => v,
 }) => {
   const axisValue = axis ? getButtonState(axis).value : 0;
   const validatedAxisValue = axis ? axisValidator(axisValue) : false;
-  const pressed = keys.includes(true) || getButtonState(gamePadButton).pressed;
+  const pressed = keys.includes(true) || getButtonState(gamepadButton).pressed;
   const value = validatedAxisValue
     ? axisValueModifier(axisValue)
     : pressed
@@ -84,8 +87,8 @@ const updateForwardState = () => {
     axis: ButtonKey.LeftAxisY,
     axisValidator: (v) => v < -0.1,
     axisValueModifier: (v) => v * -1,
-    keys: [keys.w || keys.ArrowUp],
-    gamePadButton: ButtonKey.Up,
+    keys: [keys.w || keys.arrowup],
+    gamepadButton: ButtonKey.Up,
     action: UnitAction.Forward,
   });
 };
@@ -95,8 +98,8 @@ const updateBackwardState = () => {
     prevState: unitActionState.backward,
     axis: ButtonKey.LeftAxisY,
     axisValidator: (v) => v > 0.1,
-    keys: [keys.s || keys.ArrowDown],
-    gamePadButton: ButtonKey.Down,
+    keys: [keys.s || keys.arrowdown],
+    gamepadButton: ButtonKey.Down,
     action: UnitAction.Backward,
   });
 };
@@ -107,8 +110,8 @@ const updateLeftState = () => {
     axis: ButtonKey.LeftAxisX,
     axisValidator: (v) => v < -0.1,
     axisValueModifier: (v) => v * -1,
-    keys: [keys.a || keys.ArrowLeft],
-    gamePadButton: ButtonKey.Left,
+    keys: [keys.a || keys.arrowleft],
+    gamepadButton: ButtonKey.Left,
     action: UnitAction.Left,
   });
 };
@@ -118,8 +121,8 @@ const updateRightState = () => {
     prevState: unitActionState.right,
     axis: ButtonKey.LeftAxisX,
     axisValidator: (v) => v > 0.1,
-    keys: [keys.d || keys.ArrowRight],
-    gamePadButton: ButtonKey.Right,
+    keys: [keys.d || keys.arrowright],
+    gamepadButton: ButtonKey.Right,
     action: UnitAction.Right,
   });
 };
@@ -136,7 +139,7 @@ const updateJumpState = () => {
   unitActionState.jump = calculateState({
     prevState: unitActionState.jump,
     keys: [keys.space],
-    gamePadButton: ButtonKey.ActionBottom,
+    gamepadButton: ButtonKey.ActionBottom,
     action: UnitAction.Jump,
   });
 };
@@ -145,8 +148,17 @@ const updateInteractionState = () => {
   unitActionState.interaction = calculateState({
     prevState: unitActionState.interaction,
     keys: [keys.e],
-    gamePadButton: ButtonKey.ActionLeft,
+    gamepadButton: ButtonKey.ActionLeft,
     action: UnitAction.Interaction,
+  });
+};
+
+const updatePauseState = () => {
+  unitActionState.pause = calculateState({
+    prevState: unitActionState.pause,
+    keys: [keys.escape],
+    gamepadButton: ButtonKey.Options,
+    action: UnitAction.Pause,
   });
 };
 
@@ -160,6 +172,7 @@ export const updateUnitActions = () => {
   updateWalkState();
   updateJumpState();
   updateInteractionState();
+  updatePauseState();
 
   const rightAxisX = getButtonState(ButtonKey.RightAxisX).value;
   const rightAxisY = getButtonState(ButtonKey.RightAxisY).value;

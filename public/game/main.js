@@ -31,13 +31,10 @@ import {
   AnimationId,
   MaterialId,
 } from "./assets-config.js";
+import { TooltipId } from "./tooltip-config.js";
 import { teamLevels } from "./level-config.js";
 import { loadAnimations } from "./src/utils/animation-preloader.js";
-import {
-  toScreenPosition,
-  calculateBoundingBox,
-  intersect,
-} from "./src/utils/threejs-utils.js";
+import { calculateBoundingBox, intersect } from "./src/utils/threejs-utils.js";
 import { createColliderByObject } from "./src/utils/cannon-utils.js";
 
 import {
@@ -64,6 +61,11 @@ import {
   setUnitControllerTarget,
   updateUnitController,
 } from "./src/control/unit-controller.js";
+import { showTooltip, hideTooltip, updateTooltips } from "./src/tooltips.js";
+import {
+  connectExternalCall,
+  sendExternalCall,
+} from "./src/external-communicator.js";
 
 const USE_DEBUG_RENDERER = false;
 let debugRenderer = null;
@@ -76,7 +78,6 @@ export const STATE = {
 const clock = new THREE.Clock();
 const controller = { movement: { x: 0, y: 0 }, rotation: { x: 0, y: 0 } };
 
-let tooltip;
 let selectedChest;
 
 let physicsWorld;
@@ -418,10 +419,18 @@ const createPlayers = (players, onComplete) => {
 };
 
 function init() {
-  tooltip = document.getElementById("tooltip");
+  connectExternalCall();
   document.body.appendChild(renderer.domElement);
   window.addEventListener("resize", onWindowResize, false);
   initUnitActions();
+  onUnitAction({
+    action: UnitAction.RotateCamera,
+    callback: ({ x, y }) => updateTPSCameraRotation({ x, y }),
+  });
+  onUnitAction({
+    action: UnitAction.Pause,
+    callback: () => sendExternalCall({ action: "pauseGame" }),
+  });
   renderer.domElement.onclick = renderer.domElement.requestPointerLock;
   stats = new Stats();
   document.body.appendChild(stats.dom);
@@ -476,6 +485,16 @@ const die = () => {
   users[0].isDead = true;
 };
 
+const updateData = {};
+const updateWithReducer = ({ id, callback, minDelta, elapsed }) => {
+  if (!updateData[id]) updateData[id] = { lastUpdate: 0 };
+
+  if (elapsed - updateData[id].lastUpdate > minDelta) {
+    callback();
+    updateData[id].lastUpdate = elapsed;
+  }
+};
+
 const animate = () => {
   const now = Date.now();
   const rawDelta = clock.getDelta();
@@ -488,6 +507,12 @@ const animate = () => {
   updateUnitActions();
   updateUnitController({ now, delta });
   updateParticleSystems({ delta, elapsed });
+  updateWithReducer({
+    id: "updateTooltips",
+    callback: updateTooltips,
+    minDelta: 0.05,
+    elapsed,
+  });
 
   chests.forEach((chest) => {
     const { object } = chest;
@@ -514,16 +539,12 @@ const animate = () => {
 
   updateDoors(user.object);
 
-  tooltip.style.display = selectedChest ? "block" : "none";
   if (selectedChest) {
-    const pos = toScreenPosition({
-      object: selectedChest.object,
-      camera: getCamera(),
-      canvas,
+    showTooltip({
+      id: TooltipId.INTERACTION,
+      target: selectedChest.object,
     });
-    tooltip.style.left = `${Math.floor(pos.x)}px`;
-    tooltip.style.top = `${Math.floor(pos.y) - 150}px`;
-  }
+  } else hideTooltip(TooltipId.INTERACTION);
 
   physicsWorld.step(delta);
   updateBullets({ scene, physicsWorld });
@@ -652,11 +673,6 @@ const animate = () => {
 
   requestAnimationFrame(animate);
 };
-
-onUnitAction({
-  action: UnitAction.RotateCamera,
-  callback: ({ x, y }) => updateTPSCameraRotation({ x, y }),
-});
 
 window.createWorld = ({
   serverCall,

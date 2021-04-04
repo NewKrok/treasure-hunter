@@ -1,0 +1,50 @@
+.Wrapper {
+  color: var(--color-0);
+  font-size: 1.5em;
+  border-width: 10px 10px 10px 10px;
+  border-style: solid;
+  border-image: url("../../../../asset/img/status-bg.png");
+  border-image-slice: 20 20 20 20 fill;
+  border-image-repeat: round;
+  align-self: center;
+  padding: 0.2em 0.6em;
+  width: fit-content;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  animation: Open 0.3s 0.15s forwards;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: left 0.1s linear, top 0.1s linear;
+  user-select: none;
+  pointer-events: none;
+}
+
+.Closed {
+  animation: Close 0.3s forwards;
+}
+
+@keyframes Open {
+  from {
+    opacity: 0;
+    transform: translateY(2em) translate(-50%, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translate(-50%, -50%);
+  }
+}
+
+@keyframes Close {
+  from {
+    opacity: 1;
+    transform: translateY(0) translate(-50%, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(0.5em) translate(-50%, -50%);
+  }
+}

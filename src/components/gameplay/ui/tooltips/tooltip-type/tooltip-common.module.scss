@@ -1,0 +1,17 @@
+.List {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.2em;
+
+  .Row {
+    display: flex;
+    font-size: 0.8em;
+    margin-top: 0.3em;
+
+    img {
+      margin-right: 0.5em;
+      width: 1.2em;
+      height: 1.2em;
+    }
+  }
+}

@@ -34,22 +34,23 @@ export const initGamepadManager = () => {
 };
 
 export const ButtonKey = {
-  Up: 12,
-  Down: 13,
-  Left: 14,
-  Right: 15,
   ActionBottom: 0,
   ActionLeft: 2,
   ActionRight: 1,
   ActionTop: 3,
-  LeftAxisX: 100,
-  LeftAxisY: 101,
-  LeftAxisButton: 10,
-  RightAxisX: 102,
-  RightAxisY: 103,
-  RightAxisButton: 11,
   LeftTrigger: 6,
   RightTrigger: 7,
+  Options: 9,
+  LeftAxisButton: 10,
+  RightAxisButton: 11,
+  Up: 12,
+  Down: 13,
+  Left: 14,
+  Right: 15,
+  LeftAxisX: 100,
+  LeftAxisY: 101,
+  RightAxisX: 102,
+  RightAxisY: 103,
 };
 
 export const getButtonState = (buttonKey) => {
