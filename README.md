@@ -13,12 +13,8 @@ Web based 3D adventure game.
 ## 2021.03.21 https://www.youtube.com/watch?v=HQJ-Npu85DI
 The first preview which contains the initial gameplay with some initial game mechanics like base character control, door and chest system.
 
-# Firebase
-- User handling
-- Profile handling
-- News database
-
-# Libraries
+# Dependencies
 - ThreeJS https://threejs.org/
 - CannonJS https://schteppe.github.io/cannon.js/
+- Firebase https://firebase.google.com/
 - For UI dependencies check packages.json (React / Redux / Saga / etc...)
