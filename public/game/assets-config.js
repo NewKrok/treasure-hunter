@@ -29,6 +29,7 @@ export const TextureId = {
   SKY_BOX_5: "SkyBox5",
   SKY_BOX_6: "SkyBox6",
   Particle: "particle",
+  Smoke: "smoke",
 };
 
 export const MaterialId = {
@@ -68,6 +69,10 @@ export const assetConfig = {
     {
       url: "./game/game-assets/textures/effects/particle.jpg",
       id: TextureId.Particle,
+    },
+    {
+      url: "./game/game-assets/textures/effects/smoke.jpg",
+      id: TextureId.Smoke,
     },
   ],
 };

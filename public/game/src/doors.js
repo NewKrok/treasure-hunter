@@ -18,10 +18,10 @@ const openDoor = (door) => {
   const originalLeftPosition = door.leftDoorCollider.position.clone();
   const originalRightPosition = door.rightDoorCollider.position.clone();
   gsap.to(leftDoorTweenParams, {
-    rotation: Math.PI / 1.7 / 2 + Math.PI / 1.7 / 2,
+    rotation: Math.PI / 2,
     zPosition: 0.75,
     xPosition: -0.75,
-    duration: 3,
+    duration: 6,
     onUpdate: () => {
       door.leftDoor.quaternion.setFromAxisAngle(
         new Vector3(0, 1, 0),
@@ -63,7 +63,7 @@ export const updateDoors = (user) => {
     const door = doors[key];
     if (
       !door.isOpen &&
-      door?.switch?.position.distanceTo(user.position) < 0.5
+      door?.switch?.position.distanceTo(user.object.position) < 0.5
     ) {
       console.log("OPEN");
       openDoor(door);
@@ -75,15 +75,16 @@ export const registerDoorElement = ({ element, physicsWorld }) => {
   element.castShadow = true;
   element.material = getMaterial(MaterialId.Cartoon, element.material.map);
 
+  const id = element.name.split("-")[1];
   if (element.name.includes("switch")) {
-    doors[element.userData.id] = {
-      ...doors[element.userData.id],
+    doors[id] = {
+      ...doors[id],
       switch: element,
       isOpen: false,
     };
   } else if (element.name.includes("button")) {
-    doors[element.userData.id] = {
-      ...doors[element.userData.id],
+    doors[id] = {
+      ...doors[id],
       button: element,
     };
   } else {
@@ -99,16 +100,16 @@ export const registerDoorElement = ({ element, physicsWorld }) => {
     if (element.name.includes("left")) {
       collider.position.y += elementSize.y / 2;
       collider.position.z += -elementSize.x / 2 - 0.15;
-      doors[element.userData.id] = {
-        ...doors[element.userData.id],
+      doors[id] = {
+        ...doors[id],
         leftDoorCollider: collider,
         leftDoor: element,
       };
     } else if (element.name.includes("right")) {
       collider.position.y += elementSize.y / 2;
       collider.position.z += elementSize.x / 2 + 0.15;
-      doors[element.userData.id] = {
-        ...doors[element.userData.id],
+      doors[id] = {
+        ...doors[id],
         rightDoorCollider: collider,
         rightDoor: element,
       };

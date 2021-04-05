@@ -21,7 +21,7 @@ export const createPhysicsWorld = () => {
     groundMaterial,
     groundMaterial,
     {
-      friction: 0.4,
+      friction: 0.6,
       restitution: 0.3,
       contactEquationStiffness: 1e8,
       contactEquationRelaxation: 3,

@@ -36,7 +36,7 @@ const AdventureTPSCamera = (camera) => {
         if (x || y) {
           mX += x || 0;
           mY += y || 0;
-          mY = Math.max(1.7, mY);
+          mY = Math.max(1.2, mY);
           mY = Math.min(2.7, mY);
           if (x) {
             q.setFromAxisAngle(new Vector3(0, 1, 0), -mX);

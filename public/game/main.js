@@ -31,7 +31,6 @@ import {
   AnimationId,
   MaterialId,
 } from "./assets-config.js";
-import { TooltipId } from "./tooltip-config.js";
 import { teamLevels } from "./level-config.js";
 import { loadAnimations } from "./src/utils/animation-preloader.js";
 import { calculateBoundingBox, intersect } from "./src/utils/threejs-utils.js";
@@ -45,7 +44,7 @@ import {
   UnitAction,
 } from "./src/control/unit-action-manager.js";
 import { updateParticleSystems } from "./src/effects/particle-system/particle-defaults.js";
-import { ParticleCollection } from "./src/effects/particle-system/particle-collection.js";
+import { registerChest, collectChest, updateChests } from "./src/chests.js";
 import { registerDoorElement, updateDoors } from "./src/doors.js";
 import {
   createCamera,
@@ -61,11 +60,13 @@ import {
   setUnitControllerTarget,
   updateUnitController,
 } from "./src/control/unit-controller.js";
-import { showTooltip, hideTooltip, updateTooltips } from "./src/tooltips.js";
+import { updateTooltips } from "./src/tooltips.js";
 import {
   connectExternalCall,
   sendExternalCall,
 } from "./src/external-communicator.js";
+import { ParticleCollection } from "./src/effects/particle-system/particle-collection.js";
+import { Vector3 } from "./build/three.module.js";
 
 const USE_DEBUG_RENDERER = false;
 let debugRenderer = null;
@@ -78,11 +79,8 @@ export const STATE = {
 const clock = new THREE.Clock();
 const controller = { movement: { x: 0, y: 0 }, rotation: { x: 0, y: 0 } };
 
-let selectedChest;
-
 let physicsWorld;
 let scene;
-let level;
 let stats;
 let renderer;
 let canvas;
@@ -95,16 +93,6 @@ let climbUpBlockers = [];
 let climbLeftBlockers = [];
 let climbRightBlockers = [];
 const enemies = {};
-let chests = [];
-
-const params = {
-  edgeStrength: 3.0,
-  edgeGlow: 0.0,
-  edgeThickness: 1.0,
-  pulsePeriod: 0,
-  rotate: false,
-  usePatternTexture: false,
-};
 
 let velocity = 0.0;
 
@@ -113,39 +101,7 @@ const sharedData = {
 };
 
 let outlineEffect;
-
 let lavaMaterial;
-const getLavaMaterial = ({ map }) => {
-  if (lavaMaterial) return lavaMaterial;
-
-  lavaMaterial = new THREE.MeshToonMaterial({ map });
-  lavaMaterial.emissiveIntensity = 0;
-
-  lavaMaterial.onBeforeCompile = (shader) => {
-    shader.uniforms.time = { value: 0 };
-
-    shader.vertexShader = "uniform float time;\n" + shader.vertexShader;
-    shader.vertexShader = shader.vertexShader.replace(
-      "#include <project_vertex>",
-      [
-        "#include <project_vertex>",
-        "vec4 modelViewPosition = modelViewMatrix * vec4(position.x + (sin(time * 0.2) * cos(time * 0.2) * 50.0), position.y * 1.2, position.z * 1.1, 1.0);",
-        "gl_Position = projectionMatrix * modelViewPosition;",
-      ].join("\n")
-    );
-
-    shader.fragmentShader = "uniform float time;\n" + shader.fragmentShader;
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "}",
-      ["gl_FragColor *= 1.0 + (1.0 + sin(time)) * 0.5;", "}"].join("\n")
-    );
-
-    lavaMaterial.map.wrapS = lavaMaterial.map.wrapT = THREE.RepeatWrapping;
-    lavaMaterial.userData.shader = shader;
-  };
-
-  return lavaMaterial;
-};
 
 let _ownId = "";
 let _gameMode = "";
@@ -343,44 +299,45 @@ const loadLevel = (onLoaded) => {
                 z: child.position.z,
               });
             } else if (child.name.includes("chest")) {
-              const rawData = child.name.split("|");
-              const data = JSON.parse(
-                rawData[1]
-                  .replace(/_/g, ":")
-                  .replace(/(['"])?([a-z0-9A-Z_]+)(['"])?:/g, '"$2": ')
-              );
-              child.castShadow = child.visible;
-              child.material = getMaterial(
-                MaterialId.Cartoon,
-                child.material.map
-              ).clone();
-              child.geometry.computeBoundingBox();
-
-              const collider = createColliderByObject({
-                object: child,
-                material: groundContactMaterial,
-              });
-              physicsWorld.add(collider);
-              registerCameraCollider(child);
-
-              const effect = ParticleCollection.createChestIdleEffect({
-                position: child.position,
-              });
-              scene.add(effect);
-
-              chests.push({
-                data,
-                object: child,
-                collider,
-                effect,
-              });
+              registerChest({ element: child, physicsWorld, scene });
             } else if (child.name.includes("door")) {
               registerDoorElement({ element: child, physicsWorld });
+            } else if (child.name.includes("fire")) {
+              child.visible = false;
+              const effect = ParticleCollection.createFireEffect({
+                position: child.position.add(new Vector3(-0.1, 0.1, -0.1)),
+              });
+              scene.add(effect);
+            } else if (child.name.includes("Lava")) {
+              child.receiveShadow = false;
+              child.material.roughness = 0;
+              child.material.metalness = 1;
+              lavaMaterial = child.material;
+              lavaMaterial.onBeforeCompile = (shader) => {
+                shader.uniforms.time = { value: 0 };
+                shader.vertexShader =
+                  "uniform float time;\n" + shader.vertexShader;
+                shader.vertexShader = shader.vertexShader.replace(
+                  "#include <project_vertex>",
+                  [
+                    "#include <project_vertex>",
+                    "vec4 modelViewPosition = modelViewMatrix * vec4(position.x + (sin(time * 0.2) * cos(time * 0.2) * 0.01), position.y * 1.2, position.z * 1.1, 1.0);",
+                    "gl_Position = projectionMatrix * modelViewPosition;",
+                  ].join("\n")
+                );
+                shader.fragmentShader =
+                  "uniform float time;\n" + shader.fragmentShader;
+                shader.fragmentShader = shader.fragmentShader.replace(
+                  "}",
+                  ["gl_FragColor *= 1.0 + (1.0 + sin(time)) * 0.5;", "}"].join(
+                    "\n"
+                  )
+                );
+                lavaMaterial.userData.shader = shader;
+              };
             } else {
               child.receiveShadow = true;
-              if (child.name.includes("lava")) {
-                child.material = getLavaMaterial(child.material);
-              } else {
+              if (!child.name.includes("Landscape")) {
                 child.material = getMaterial(
                   MaterialId.Cartoon,
                   child.material.map
@@ -390,7 +347,6 @@ const loadLevel = (onLoaded) => {
           }
         }
       });
-      level = gltfScene;
       scene.add(gltfScene);
       onLoaded();
     }
@@ -513,38 +469,8 @@ const animate = () => {
     minDelta: 0.05,
     elapsed,
   });
-
-  chests.forEach((chest) => {
-    const { object } = chest;
-    if (object.position.distanceTo(users[0].object.position) < 1.5) {
-      if (object.material.userData.outlineParameters?.thickness !== 0.002) {
-        object.material.userData.outlineParameters = {
-          thickness: 0.002,
-          color: [1, 1, 0],
-          alpha: 10,
-        };
-        selectedChest = chest;
-      }
-    } else if (
-      object.material.userData.outlineParameters?.thickness !== 0.001
-    ) {
-      object.material.userData.outlineParameters = {
-        thickness: 0.001,
-        color: [0, 0, 0],
-        alpha: 1,
-      };
-      selectedChest = null;
-    }
-  });
-
-  updateDoors(user.object);
-
-  if (selectedChest) {
-    showTooltip({
-      id: TooltipId.INTERACTION,
-      target: selectedChest.object,
-    });
-  } else hideTooltip(TooltipId.INTERACTION);
+  updateChests(user);
+  updateDoors(user);
 
   physicsWorld.step(delta);
   updateBullets({ scene, physicsWorld });
@@ -560,8 +486,6 @@ const animate = () => {
       if (hasContact) die();
     });
   }
-
-  const { isStanding } = users[0];
 
   light.position.x = users[0].object.position.x;
   light.position.y = users[0].object.position.y + 8;
@@ -756,38 +680,7 @@ window.createWorld = ({
               });
               onUnitAction({
                 action: UnitAction.Interaction,
-                callback: () => {
-                  if (selectedChest) {
-                    const { object, collider, effect } = selectedChest;
-
-                    effect.geometry.dispose();
-                    effect.material.dispose();
-                    scene.remove(effect);
-
-                    const removeChest = () => {
-                      object.parent.remove(object);
-                      physicsWorld.remove(collider);
-                      chests = chests.filter((chest) => chest != selectedChest);
-                      selectedChest = null;
-                    };
-
-                    const collectEffect = ParticleCollection.createChestCollectEffect(
-                      {
-                        position: object.position,
-                      }
-                    );
-                    scene.add(collectEffect);
-
-                    gsap.to(object.scale, {
-                      x: 0.1,
-                      y: 0.1,
-                      z: 0.1,
-                      duration: 0.3,
-                      delay: 0.6,
-                      onComplete: removeChest,
-                    });
-                  }
-                },
+                callback: () => collectChest({ scene, physicsWorld }),
               });
               init();
               animate();
