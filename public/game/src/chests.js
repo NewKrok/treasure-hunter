@@ -1,7 +1,7 @@
 import { MaterialId } from "../assets-config.js";
 import { TooltipId } from "../tooltip-config.js";
-import { getMaterial } from "./assets.js";
-import { registerCameraCollider } from "./camera.js";
+import { getMaterial } from "../game-engine/assets/assets.js";
+import { registerCameraCollider } from "../game-engine/camera/camera.js";
 import { ParticleCollection } from "./effects/particle-system/particle-collection.js";
 import { groundContactMaterial } from "./physics/physics.js";
 import { hideTooltip, showTooltip } from "./tooltips.js";

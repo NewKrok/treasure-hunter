@@ -1,0 +1,25 @@
+.Wrapper {
+  pointer-events: none;
+  position: relative;
+
+  .Background {
+    width: 100%;
+    height: 58px;
+    border-width: 24px 44px 34px 60px;
+    border-style: solid;
+    border-image: url("../../../asset/img/slider-loading-bg.png");
+    border-image-slice: 24 44 34 60;
+    border-image-repeat: round;
+  }
+
+  .Progress {
+    background: var(--color-2);
+    width: 0%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 0.2s;
+    box-shadow: inset 0 25px 0 #00000015;
+  }
+}

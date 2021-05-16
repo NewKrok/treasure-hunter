@@ -1,6 +1,6 @@
 import { toScreenPosition } from "./utils/threejs-utils.js";
 import { tooltipConfig, TooltipTypes } from "../tooltip-config.js";
-import { getCamera } from "./camera.js";
+import { getCamera } from "../game-engine/camera/camera.js";
 import { sendExternalCall } from "./external-communicator.js";
 
 const tooltipStates = {};

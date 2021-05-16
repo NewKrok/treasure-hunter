@@ -1,4 +1,4 @@
-import { getTexture } from "../../assets.js";
+import { getTexture } from "../../../game-engine/assets/assets.js";
 import { TextureId } from "../../../assets-config.js";
 import { createParticleSystem } from "./particle-defaults.js";
 

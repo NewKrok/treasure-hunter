@@ -33,7 +33,9 @@ export const initUserManager = (world) => {
         });
       }
       if (isOnGround) user.lastOnGroundTime = now;
-      user.isStanding = now - user.lastOnGroundTime < 100 || isOnGround;
+      user.isStanding =
+        (now - user.lastOnGroundTime < 400 && !user.isJumpTriggered) ||
+        isOnGround;
     });
   });
 };
@@ -47,6 +49,7 @@ export const addUser = ({
   isOwn,
   onComplete,
   sharedData,
+  useDebugRender,
 }) => {
   _sharedData = sharedData;
   if (users.find((user) => user.id == id)) {
@@ -60,6 +63,7 @@ export const addUser = ({
       rotation,
       isOwn,
       scene,
+      useDebugRender,
       onComplete: (user) => {
         users.push(user);
         console.log(users.length);
@@ -81,6 +85,12 @@ export const updateUsers = (delta) => {
         user,
         animation: user.isDead
           ? AnimationId.DIE
+          : user.isSlashTriggered
+          ? AnimationId.SLASH
+          : user.isShootTriggered
+          ? AnimationId.SHOOTING_PISTOL
+          : user.isWeaponChangeTriggered
+          ? AnimationId.CHANGE_WEAPON
           : user.isClimbingUp
           ? AnimationId.CLIMBING
           : now - user.climbEndTime < 500
@@ -118,12 +128,27 @@ export const updateUsers = (delta) => {
           : AnimationId.WALK_BACK,
         transitionTime: now - user.climbEndTime < 500 ? 0 : 0.15,
         loop:
-          !user.isClimbingUp && !user.isDead && now - user.climbEndTime > 300,
+          !user.isWeaponChangeTriggered &&
+          !user.isClimbingUp &&
+          !user.isDead &&
+          now - user.climbEndTime > 300,
       });
       user.mixer.update(delta);
       if (user.isJumpTriggered && !user.wasJumpTriggered) {
         user.jumpStartTime = now;
         user.wasJumpTriggered = true;
+      }
+      if (user.isSlashTriggered && !user.wasSlashTriggered) {
+        user.slashStartTime = now;
+        user.wasSlashTriggered = true;
+      }
+      if (user.isShootTriggered && !user.wasShootTriggered) {
+        user.shootStartTime = now;
+        user.wasShootTriggered = true;
+      }
+      if (user.isWeaponChangeTriggered && !user.wasWeaponChangeTriggered) {
+        user.weaponChangeStartTime = now;
+        user.wasWeaponChangeTriggered = true;
       }
       if (isStanding && !user.wasLanded) {
         user.wasLanded = true;

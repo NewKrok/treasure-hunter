@@ -12,8 +12,13 @@ export const UnitAction = {
   Backward: "Backward",
   Left: "Left",
   Right: "Right",
-  Walk: "Walk",
+  Run: "Run",
   Jump: "Jump",
+  Attack: "Attack",
+  Crouch: "Crouch",
+  Aim: "Aim",
+  ChooseWeapon1: "ChooseWeapon1",
+  ChooseWeapon2: "ChooseWeapon2",
   RotateCamera: "RotateCamera",
   Interaction: "Interaction",
   Pause: "Pause",
@@ -24,8 +29,13 @@ export const unitActionState = {
   backward: { pressed: false, value: 0 },
   left: { pressed: false, value: 0 },
   right: { pressed: false, value: 0 },
-  walk: { pressed: false, value: 0 },
+  run: { pressed: false, value: 0 },
   jump: { pressed: false, value: 0 },
+  attack: { pressed: false, value: 0 },
+  crouch: { pressed: false, value: 0 },
+  aim: { pressed: false, value: 0 },
+  chooseWeapon1: { pressed: false, value: 0 },
+  chooseWeapon2: { pressed: false, value: 0 },
   interaction: { pressed: false, value: 0 },
   pause: { pressed: false, value: 0 },
 };
@@ -36,11 +46,14 @@ const keys = {
   d: false,
   w: false,
   e: false,
+  1: false,
+  2: false,
   arrowup: false,
   arrowdown: false,
   arrowleft: false,
   arrowright: false,
   shift: false,
+  control: false,
   space: false,
   escape: false,
 };
@@ -127,11 +140,11 @@ const updateRightState = () => {
   });
 };
 
-const updateWalkState = () => {
-  unitActionState.walk = calculateState({
-    prevState: unitActionState.walk,
+const updateRunState = () => {
+  unitActionState.run = calculateState({
+    prevState: unitActionState.run,
     keys: [keys.shift],
-    action: UnitAction.Walk,
+    action: UnitAction.Run,
   });
 };
 
@@ -141,6 +154,51 @@ const updateJumpState = () => {
     keys: [keys.space],
     gamepadButton: ButtonKey.ActionBottom,
     action: UnitAction.Jump,
+  });
+};
+
+const updateAttackState = () => {
+  unitActionState.attack = calculateState({
+    prevState: unitActionState.attack,
+    keys: [],
+    gamepadButton: ButtonKey.ActionLeft,
+    action: UnitAction.Attack,
+  });
+};
+
+const updateAimState = () => {
+  unitActionState.aim = calculateState({
+    prevState: unitActionState.aim,
+    keys: [],
+    gamepadButton: ButtonKey.RightTrigger,
+    action: UnitAction.Aim,
+  });
+};
+
+const updateChooseWeapon1State = () => {
+  unitActionState.chooseWeapon1 = calculateState({
+    prevState: unitActionState.chooseWeapon1,
+    keys: [keys[1]],
+    gamepadButton: ButtonKey.ActionLeft,
+    action: UnitAction.ChooseWeapon1,
+  });
+};
+
+const updateChooseWeapon2State = () => {
+  unitActionState.chooseWeapon2 = calculateState({
+    prevState: unitActionState.chooseWeapon2,
+    keys: [keys[2]],
+    gamepadButton: ButtonKey.LeftTrigger,
+    action: UnitAction.ChooseWeapon2,
+  });
+};
+
+const updateCrouchState = () => {
+  unitActionState.crouch = calculateState({
+    prevState: unitActionState.crouch,
+    keys: [keys.control],
+    gamepadButton: ButtonKey.RightAxisButton,
+    action: UnitAction.Crouch,
   });
 };
 
@@ -169,8 +227,13 @@ export const updateUnitActions = () => {
   updateBackwardState();
   updateLeftState();
   updateRightState();
-  updateWalkState();
+  updateRunState();
   updateJumpState();
+  updateAttackState();
+  updateCrouchState();
+  updateAimState();
+  updateChooseWeapon1State();
+  updateChooseWeapon2State();
   updateInteractionState();
   updatePauseState();
 
@@ -205,6 +268,25 @@ export const initUnitActions = () => {
       action: UnitAction.RotateCamera,
       value: { x: movementX / 350, y: movementY / 350 },
     });
+  });
+  document.addEventListener("mousedown", (e) => {
+    switch (e.button) {
+      case 0:
+        trigger({
+          action: UnitAction.Attack,
+          value: 1,
+        });
+        break;
+
+      case 2:
+        trigger({
+          action: UnitAction.Aim,
+          value: 1,
+        });
+        break;
+
+      default:
+    }
   });
 };
 

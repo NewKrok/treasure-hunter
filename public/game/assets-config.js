@@ -2,6 +2,8 @@ export const AnimationId = {
   IDLE: "ANIMATION.IDLE",
   WALK: "ANIMATION.WALK",
   WALK_BACK: "ANIMATION.WALK_BACK",
+  WALK_CROUCH: "ANIMATION.WALK_CROUCH",
+  WALK_PISTOL: "ANIMATION.WALK_PISTOL",
   RUN: "ANIMATION.RUN",
   SPRINT: "ANIMATION.SPRINT",
   RUN_BACK: "ANIMATION.RUN_BACK",
@@ -18,18 +20,28 @@ export const AnimationId = {
   SIDLE_RIGHT: "ANIMATION.SIDLE_RIGHT",
   TURN_LEFT: "ANIMATION.TURN_LEFT",
   TURN_RIGHT: "ANIMATION.TURN_RIGHT",
+  SLASH: "ANIMATION.SLASH",
+  SHOOTING_PISTOL: "ANIMATION.SHOOTING_PISTOL",
+  CHANGE_WEAPON: "ANIMATION.CHANGE_WEAPON",
 };
 
 export const TextureId = {
-  ADVENTURES_TEXTURE: "AdventurersTexture",
-  SKY_BOX_1: "SkyBox1",
-  SKY_BOX_2: "SkyBox2",
-  SKY_BOX_3: "SkyBox3",
-  SKY_BOX_4: "SkyBox4",
-  SKY_BOX_5: "SkyBox5",
-  SKY_BOX_6: "SkyBox6",
+  AdventurerTexture: "adventurer-texture",
+  SkyBox1: "sky-box-1",
+  SkyBox2: "sky-box-2",
+  SkyBox3: "sky-box-3",
+  SkyBox4: "sky-box-4",
+  SkyBox5: "sky-box-5",
+  SkyBox6: "sky-box-6",
   Particle: "particle",
   Smoke: "smoke",
+  SmokeBig: "smoke-big",
+};
+
+export const FBXModelId = {
+  Hat1: "hat-1",
+  Machete: "machete",
+  Pistol: "pistol",
 };
 
 export const MaterialId = {
@@ -40,31 +52,31 @@ export const assetConfig = {
   textures: [
     {
       url: "./game/game-assets/3d/characters/adventurers-texture.png",
-      id: "AdventurersTexture",
+      id: TextureId.AdventurerTexture,
     },
     {
       url: "./game/game-assets/textures/skybox/sb_1.jpg",
-      id: "SkyBox1",
+      id: TextureId.SkyBox1,
     },
     {
       url: "./game/game-assets/textures/skybox/sb_2.jpg",
-      id: "SkyBox2",
+      id: TextureId.SkyBox2,
     },
     {
       url: "./game/game-assets/textures/skybox/sb_3.jpg",
-      id: "SkyBox3",
+      id: TextureId.SkyBox3,
     },
     {
       url: "./game/game-assets/textures/skybox/sb_4.jpg",
-      id: "SkyBox4",
+      id: TextureId.SkyBox4,
     },
     {
       url: "./game/game-assets/textures/skybox/sb_5.jpg",
-      id: "SkyBox5",
+      id: TextureId.SkyBox5,
     },
     {
       url: "./game/game-assets/textures/skybox/sb_6.jpg",
-      id: "SkyBox6",
+      id: TextureId.SkyBox6,
     },
     {
       url: "./game/game-assets/textures/effects/particle.jpg",
@@ -73,6 +85,24 @@ export const assetConfig = {
     {
       url: "./game/game-assets/textures/effects/smoke.jpg",
       id: TextureId.Smoke,
+    },
+    {
+      url: "./game/game-assets/textures/effects/smoke-big.jpg",
+      id: TextureId.SmokeBig,
+    },
+  ],
+  fbxModels: [
+    {
+      url: "./game/game-assets/3d/items/hat-1.fbx",
+      id: FBXModelId.Hat1,
+    },
+    {
+      url: "./game/game-assets/3d/items/machete.fbx",
+      id: FBXModelId.Machete,
+    },
+    {
+      url: "./game/game-assets/3d/items/pistol.fbx",
+      id: FBXModelId.Pistol,
     },
   ],
 };

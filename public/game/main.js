@@ -1,6 +1,10 @@
 import { GLTFLoader } from "./lib/jsm/loaders/GLTFLoader.js";
 import Stats from "./lib/jsm/libs/stats.module.js";
 import { CreateTrimesh } from "./src/utils/cannon-utils.js";
+import { EffectComposer } from "./lib/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "./lib/jsm/postprocessing/RenderPass.js";
+import { BokehPass } from "./lib/jsm/postprocessing/BokehPass.js";
+import { OutlinePass } from "./lib/jsm/postprocessing/OutlinePass.js";
 import {
   createPhysicsWorld,
   groundContactMaterial,
@@ -24,15 +28,10 @@ import {
   getBullets,
 } from "./src/user/bullet-manager.js";
 
-import { getMaterial, getTexture, registerTexture } from "./src/assets.js";
-import {
-  assetConfig,
-  TextureId,
-  AnimationId,
-  MaterialId,
-} from "./assets-config.js";
+import { getTexture, preload } from "./game-engine/assets/assets.js";
+import { assetConfig, TextureId, AnimationId } from "./assets-config.js";
 import { teamLevels } from "./level-config.js";
-import { loadAnimations } from "./src/utils/animation-preloader.js";
+import { loadAnimations } from "./game-engine/assets/animation-preloader.js";
 import { calculateBoundingBox, intersect } from "./src/utils/threejs-utils.js";
 import { createColliderByObject } from "./src/utils/cannon-utils.js";
 
@@ -48,14 +47,13 @@ import { registerChest, collectChest, updateChests } from "./src/chests.js";
 import { registerDoorElement, updateDoors } from "./src/doors.js";
 import {
   createCamera,
-  getCamera,
   registerCameraCollider,
   updateCameraRatio,
   setCameraPosition,
   updateCamera,
   setCameraTarget,
   updateTPSCameraRotation,
-} from "./src/camera.js";
+} from "./game-engine/camera/camera.js";
 import {
   setUnitControllerTarget,
   updateUnitController,
@@ -86,7 +84,6 @@ let renderer;
 let canvas;
 let light;
 let controls;
-let textureAssets = {};
 let spawnPoints = [];
 let climbableAreas = [];
 let climbUpBlockers = [];
@@ -94,13 +91,14 @@ let climbLeftBlockers = [];
 let climbRightBlockers = [];
 const enemies = {};
 
-let velocity = 0.0;
-
 const sharedData = {
   state: STATE.WAITING_FOR_START,
 };
 
-let outlineEffect;
+const postprocessing = {};
+let outlinePass;
+
+//let outlineEffect;
 let lavaMaterial;
 
 let _ownId = "";
@@ -108,11 +106,11 @@ let _gameMode = "";
 let _serverCall = (args) => {};
 
 const initThreeJS = () => {
-  createCamera();
+  const camera = createCamera().perspectiveCamera;
 
   scene = new THREE.Scene();
 
-  var alight = new THREE.AmbientLight(0xffffff, 1);
+  var alight = new THREE.AmbientLight(0xffffff, 0.1);
   scene.add(alight);
 
   light = new THREE.PointLight(0xffffff, 1, 100);
@@ -122,6 +120,12 @@ const initThreeJS = () => {
   light.shadow.mapSize.width = 2048;
   light.shadow.mapSize.height = 2048;
   scene.add(light);
+
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+  hemiLight.color.setHSL(0.6, 1, 0.6);
+  hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+  hemiLight.position.set(0, 50, 0);
+  scene.add(hemiLight);
 
   canvas = document.getElementById("canvas");
 
@@ -136,52 +140,69 @@ const initThreeJS = () => {
   renderer.toneMapping = THREE.LinearToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.autoClear = false;
+  renderer.gammaOutput = true;
+  renderer.gammaFactor = 2.2;
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(0x000000, 1);
 
-  outlineEffect = new THREE.OutlineEffect(renderer, {
+  /*outlineEffect = new THREE.OutlineEffect(renderer, {
     defaultThickness: 0.001,
     defaultColor: [0, 0, 0],
     defaultAlpha: 1,
     defaultKeepAlive: true,
+  });*/
+
+  const renderPass = new RenderPass(scene, camera);
+
+  // atm it doesn't work with skinned mesh :/
+  // https://discourse.threejs.org/t/dof-bokeh-pass-with-animated-gltf/23794
+  /* const bokehPass = new BokehPass(scene, camera, {
+    focus: 10.0,
+    aperture: 0.0002,
+    maxblur: 0.01,
+
+    width: window.innerWidth,
+    height: window.innerHeight,
   });
+  bokehPass.materialDepth.skinning = true; */
+
+  outlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera,
+    []
+  );
+  outlinePass.depthMaterial.skinning = true;
+  outlinePass.prepareMaskMaterial.skinning = true;
+
+  const composer = new EffectComposer(renderer);
+
+  composer.addPass(renderPass);
+  //composer.addPass(outlinePass);
+  //composer.addPass(bokehPass);
+
+  postprocessing.composer = composer;
+  //postprocessing.bokeh = bokehPass;
+
+  const effect = ParticleCollection.createCloudEffect({
+    position: new Vector3(10, 0, 0),
+  });
+  scene.add(effect);
 
   if (USE_DEBUG_RENDERER) {
     debugRenderer = new THREE.CannonDebugRenderer(scene, physicsWorld);
   }
 };
 
-const loadTextures = (textureConfig, onLoaded) => {
-  const currentConfig = textureConfig[0];
-  console.log(
-    `Load texture asset ${currentConfig.id} from: ${currentConfig.url}`
-  );
-  new THREE.TextureLoader().load(currentConfig.url, (texture) => {
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    textureAssets = {
-      ...textureAssets,
-      [currentConfig.id]: new THREE.MeshBasicMaterial({
-        map: texture,
-      }),
-    };
-    registerTexture({ key: currentConfig.id, texture });
-    if (textureConfig.length > 1) {
-      textureConfig.shift();
-      loadTextures(textureConfig, onLoaded);
-    } else onLoaded();
-  });
-};
-
 const createSkyBox = () => {
   const materialArray = [
-    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SKY_BOX_1) }),
-    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SKY_BOX_2) }),
-    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SKY_BOX_3) }),
-    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SKY_BOX_4) }),
-    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SKY_BOX_5) }),
-    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SKY_BOX_6) }),
+    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SkyBox1) }),
+    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SkyBox2) }),
+    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SkyBox3) }),
+    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SkyBox4) }),
+    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SkyBox5) }),
+    new THREE.MeshBasicMaterial({ map: getTexture(TextureId.SkyBox6) }),
   ];
   materialArray.forEach((m) => (m.side = THREE.BackSide));
 
@@ -273,7 +294,8 @@ const loadLevel = (onLoaded) => {
                 material: groundContactMaterial,
               });
               physicsWorld.add(collider);
-              registerCameraCollider(child);
+              if (!child.userData.isCameraBlocker)
+                registerCameraCollider(child);
             } else if (child.name.includes("Enemy")) {
               const rawData = child.name.split("|");
               const key = rawData[0];
@@ -306,6 +328,7 @@ const loadLevel = (onLoaded) => {
               child.visible = false;
               const effect = ParticleCollection.createFireEffect({
                 position: child.position.add(new Vector3(-0.1, 0.1, -0.1)),
+                size: child.userData?.size || 1,
               });
               scene.add(effect);
             } else if (child.name.includes("Lava")) {
@@ -338,10 +361,7 @@ const loadLevel = (onLoaded) => {
             } else {
               child.receiveShadow = true;
               if (!child.name.includes("Landscape")) {
-                child.material = getMaterial(
-                  MaterialId.Cartoon,
-                  child.material.map
-                );
+                child.material.flatShading = true;
               }
             }
           }
@@ -488,7 +508,7 @@ const animate = () => {
   }
 
   light.position.x = users[0].object.position.x;
-  light.position.y = users[0].object.position.y + 8;
+  light.position.y = users[0].object.position.y + 15;
   light.position.z = users[0].object.position.z;
 
   if (!users[0].isDead) {
@@ -553,7 +573,7 @@ const animate = () => {
       }
 
       if (!users[0].isClimbingUp) {
-        velocity = 0.0;
+        let velocity = 0.0;
         if (unitActionState.left.pressed && canClimbLeft) velocity = 1;
         else if (unitActionState.right.pressed && canClimbRight) velocity = -1;
         let relativeVector = new CANNON.Vec3(velocity * delta, 0, 0);
@@ -582,7 +602,8 @@ const animate = () => {
   if (lavaMaterial?.userData?.shader)
     lavaMaterial.userData.shader.uniforms.time.value += delta;
 
-  outlineEffect.render(scene, getCamera());
+  //outlineEffect.render(scene, getCamera());
+  postprocessing.composer.render(0.1);
 
   performance.mark("threejs-render-end-mark");
   performance.measure(
@@ -610,35 +631,46 @@ window.createWorld = ({
   _serverCall = serverCall;
   sharedData.state = STATE.WAITING_FOR_START;
 
-  loadAnimations({
-    [AnimationId.WALK]: "./game/game-assets/3d/animations/walk.fbx",
-    [AnimationId.WALK_BACK]: "./game/game-assets/3d/animations/walk-back.fbx",
-    [AnimationId.RUN]: "./game/game-assets/3d/animations/run.fbx",
-    [AnimationId.SPRINT]: "./game/game-assets/3d/animations/sprint.fbx",
-    [AnimationId.RUN_BACK]: "./game/game-assets/3d/animations/run-back.fbx",
-    [AnimationId.IDLE]: "./game/game-assets/3d/animations/idle.fbx",
-    [AnimationId.FALLING_IDLE]:
-      "./game/game-assets/3d/animations/falling-idle.fbx",
-    [AnimationId.FALLING_LANDING]:
-      "./game/game-assets/3d/animations/falling-landing.fbx",
-    [AnimationId.HANGING]: "./game/game-assets/3d/animations/hanging.fbx",
-    [AnimationId.SHIMMY_LEFT]:
-      "./game/game-assets/3d/animations/shimmy-left.fbx",
-    [AnimationId.SHIMMY_RIGHT]:
-      "./game/game-assets/3d/animations/shimmy-right.fbx",
-    [AnimationId.CLIMBING]: "./game/game-assets/3d/animations/climbing.fbx",
-    [AnimationId.STANDING]: "./game/game-assets/3d/animations/standing.fbx",
-    [AnimationId.VICTORY]: "./game/game-assets/3d/animations/victory.fbx",
-    [AnimationId.DIE]: "./game/game-assets/3d/animations/die.fbx",
-    [AnimationId.SIDLE_LEFT]: "./game/game-assets/3d/animations/sidle-left.fbx",
-    [AnimationId.SIDLE_RIGHT]:
-      "./game/game-assets/3d/animations/sidle-right.fbx",
-    [AnimationId.DIE]: "./game/game-assets/3d/animations/die.fbx",
-    [AnimationId.TURN_LEFT]: "./game/game-assets/3d/animations/turn-left.fbx",
-    [AnimationId.TURN_RIGHT]: "./game/game-assets/3d/animations/turn-right.fbx",
-  }).then(
-    () => {
-      loadTextures(assetConfig.textures, () => {
+  preload(assetConfig).then(() =>
+    loadAnimations({
+      [AnimationId.WALK]: "./game/game-assets/3d/animations/walk.fbx",
+      [AnimationId.WALK_BACK]: "./game/game-assets/3d/animations/walk-back.fbx",
+      [AnimationId.WALK_CROUCH]:
+        "./game/game-assets/3d/animations/walk-crouch.fbx",
+      [AnimationId.WALK_PISTOL]:
+        "./game/game-assets/3d/animations/walk-pistol.fbx",
+      [AnimationId.RUN]: "./game/game-assets/3d/animations/run.fbx",
+      [AnimationId.SPRINT]: "./game/game-assets/3d/animations/sprint.fbx",
+      [AnimationId.RUN_BACK]: "./game/game-assets/3d/animations/run-back.fbx",
+      [AnimationId.IDLE]: "./game/game-assets/3d/animations/idle.fbx",
+      [AnimationId.FALLING_IDLE]:
+        "./game/game-assets/3d/animations/falling-idle.fbx",
+      [AnimationId.FALLING_LANDING]:
+        "./game/game-assets/3d/animations/falling-landing.fbx",
+      [AnimationId.HANGING]: "./game/game-assets/3d/animations/hanging.fbx",
+      [AnimationId.SHIMMY_LEFT]:
+        "./game/game-assets/3d/animations/shimmy-left.fbx",
+      [AnimationId.SHIMMY_RIGHT]:
+        "./game/game-assets/3d/animations/shimmy-right.fbx",
+      [AnimationId.CLIMBING]: "./game/game-assets/3d/animations/climbing.fbx",
+      [AnimationId.STANDING]: "./game/game-assets/3d/animations/standing.fbx",
+      [AnimationId.VICTORY]: "./game/game-assets/3d/animations/victory.fbx",
+      [AnimationId.DIE]: "./game/game-assets/3d/animations/die.fbx",
+      [AnimationId.SIDLE_LEFT]:
+        "./game/game-assets/3d/animations/sidle-left.fbx",
+      [AnimationId.SIDLE_RIGHT]:
+        "./game/game-assets/3d/animations/sidle-right.fbx",
+      [AnimationId.DIE]: "./game/game-assets/3d/animations/die.fbx",
+      [AnimationId.TURN_LEFT]: "./game/game-assets/3d/animations/turn-left.fbx",
+      [AnimationId.TURN_RIGHT]:
+        "./game/game-assets/3d/animations/turn-right.fbx",
+      [AnimationId.SLASH]: "./game/game-assets/3d/animations/slash.fbx",
+      [AnimationId.SHOOTING_PISTOL]:
+        "./game/game-assets/3d/animations/shooting-pistol.fbx",
+      [AnimationId.CHANGE_WEAPON]:
+        "./game/game-assets/3d/animations/change-weapon.fbx",
+    }).then(
+      () => {
         physicsWorld = createPhysicsWorld();
         initUserManager(physicsWorld);
         initThreeJS();
@@ -648,6 +680,7 @@ window.createWorld = ({
 
           addUser({
             scene,
+            useDebugRender: USE_DEBUG_RENDERER,
             id: userId,
             name: userName,
             isOwn: true,
@@ -658,26 +691,9 @@ window.createWorld = ({
             },
             rotation: spawnPoints[0].rotation,
             onComplete: (user) => {
+              //outlinePass.selectedObjects = [user.object];
               setCameraTarget(user.object);
               setUnitControllerTarget(user);
-              onUnitAction({
-                action: UnitAction.Jump,
-                callback: () => {
-                  const now = Date.now();
-                  if (user.isStanding) {
-                    user.isStanding = false;
-                    user.isJumpTriggered = true;
-                    user.physics.velocity.y = 10;
-                  } else if (
-                    user.isHanging &&
-                    (!user.isClimbingUp ||
-                      (user.isClimbingUp && now - user.climbStartTime < 1500))
-                  ) {
-                    user.isHanging = false;
-                    user.cancelHangingTime = now;
-                  }
-                },
-              });
               onUnitAction({
                 action: UnitAction.Interaction,
                 callback: () => collectChest({ scene, physicsWorld }),
@@ -726,9 +742,9 @@ window.createWorld = ({
             runEnemyLogic(enemies[key]);
           });
         });
-      });
-    },
-    (error) => console.error("Failed!", error)
+      },
+      (error) => console.error("Failed!", error)
+    )
   );
 };
 

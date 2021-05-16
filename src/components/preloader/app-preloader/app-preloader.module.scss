@@ -32,34 +32,6 @@
       user-select: none;
     }
 
-    .Slider {
-      width: 40%;
-      height: 58px;
-      position: relative;
-
-      .Background {
-        width: 100%;
-        height: 58px;
-        border-width: 24px 44px 34px 60px;
-        border-style: solid;
-        border-image: url("../../../asset/img/slider-loading-bg.png");
-        border-image-slice: 24 44 34 60;
-        border-image-repeat: round;
-      }
-
-      .Progress {
-        background: var(--color-2);
-        width: 0%;
-        height: 100%;
-        position: absolute;
-        left: 0;
-        top: 0;
-        clip-path: url(#app-preloader);
-        transition: width 1.5s;
-        box-shadow: inset 0 25px 0 #00000015;
-      }
-    }
-
     .Title {
       color: var(--color-0);
       font-size: 3em;
@@ -68,19 +40,20 @@
       text-align: center;
       user-select: none;
     }
+
+    .Preloader {
+      width: 40%;
+      height: 58px;
+    }
+
+    .PreloaderLine {
+      transition: width 1.5s;
+    }
   }
 }
 
 .Loaded {
   animation: FadeOut 1s 2s forwards;
-
-  .Content {
-    .Slider {
-      .Progress {
-        width: 100%;
-      }
-    }
-  }
 }
 
 @keyframes FadeIn {

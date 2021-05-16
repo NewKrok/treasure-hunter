@@ -1,8 +1,8 @@
 import { Vector3 } from "../build/three.module.js";
 
 import { MaterialId } from "../assets-config.js";
-import { getMaterial } from "./assets.js";
-import { registerCameraCollider } from "./camera.js";
+import { getMaterial } from "../game-engine/assets/assets.js";
+import { registerCameraCollider } from "../game-engine/camera/camera.js";
 import { groundContactMaterial } from "./physics/physics.js";
 import { createColliderByObject } from "./utils/cannon-utils.js";
 

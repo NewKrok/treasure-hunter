@@ -1,4 +1,4 @@
-import { getTexture } from "../../assets.js";
+import { getTexture } from "../../../game-engine/assets/assets.js";
 import { TextureId } from "../../../assets-config.js";
 import { createParticleSystem } from "./particle-defaults.js";
 
@@ -24,15 +24,15 @@ const onUpdate = ({ particleSystem, delta }) => {
   particleSystem.geometry.attributes.opacity.needsUpdate = true;
 };
 
-export const createFireEffect = ({ position }) => {
+export const createFireEffect = ({ position, size: ratio }) => {
   const particleCount = 20;
   const startPosition = {
-    x: { min: 0.0, max: 0.2 },
-    y: { min: 0.0, max: 0.2 },
-    z: { min: 0.0, max: 0.2 },
+    x: { min: 0.0, max: 0.2 * ratio },
+    y: { min: 0.0, max: 0.2 * ratio },
+    z: { min: 0.0, max: 0.2 * ratio },
   };
   const speed = { min: 0.3, max: 0.6 };
-  const size = { min: 2.0, max: 10.0 };
+  const size = { min: 2.0 * ratio, max: 10.0 * ratio };
 
   const particleSystem = createParticleSystem({
     map: getTexture(TextureId.Smoke),
@@ -45,7 +45,7 @@ export const createFireEffect = ({ position }) => {
   particleSystem.geometry.setAttribute(
     "colorR",
     new THREE.BufferAttribute(
-      new Float32Array(Array.from({ length: particleCount }, () => 1)),
+      new Float32Array(Array.from({ length: particleCount }, () => 2)),
       1
     )
   );
