@@ -1,4 +1,8 @@
-import { getTPSCameraRotation } from "../../game-engine/camera/camera.js";
+import {
+  getTPSCameraRotation,
+  useAimZoom,
+  disableAimZoom,
+} from "../../game-engine/camera/camera.js";
 import {
   onUnitAction,
   UnitAction,
@@ -24,7 +28,7 @@ let stamina = 100;
 const staminaRegenerationRatio = 20;
 const jumpStaminaCost = 10;
 const slashStaminaCost = 30;
-const shootStaminaCost = 40;
+const shootStaminaCost = 25;
 const runStaminaCostRatio = 30;
 
 const jumpTimeout = 200;
@@ -33,6 +37,11 @@ const shootTimeout = 500;
 const weaponChangeTimeout = 600;
 
 let staminaBar = null;
+
+const clearAimState = () => {
+  disableAimZoom();
+  currentTarget.useAim = false;
+};
 
 export const setUnitControllerTarget = (target) => {
   currentTarget = target;
@@ -60,6 +69,7 @@ export const setUnitControllerTarget = (target) => {
         currentTarget.isHanging = false;
         currentTarget.cancelHangingTime = now;
       }
+      if (currentTarget.useAim) clearAimState();
     },
   });
 
@@ -86,6 +96,40 @@ export const setUnitControllerTarget = (target) => {
     },
   });
 
+  const choosePistol = () => {
+    if (!currentTarget.isWeaponChangeTriggered) {
+      setTimeout(() => {
+        if (currentTarget) {
+          if (selectedWeaponType !== WeaponType.Pistol) {
+            selectedWeaponType = WeaponType.Pistol;
+            currentTarget.usePistol();
+          } else {
+            selectedWeaponType = WeaponType.Unarmed;
+            currentTarget.useUnarmed();
+            clearAimState();
+          }
+        }
+      }, 500);
+      currentTarget.isWeaponChangeTriggered = true;
+    }
+  };
+
+  onUnitAction({
+    action: UnitAction.Aim,
+    callback: () => {
+      const zoom = () => {
+        currentTarget.useAim = !currentTarget.useAim;
+        if (currentTarget.useAim) useAimZoom();
+        else clearAimState();
+      };
+
+      if (selectedWeaponType !== WeaponType.Pistol) {
+        choosePistol();
+        setTimeout(zoom, 500);
+      } else zoom();
+    },
+  });
+
   onUnitAction({
     action: UnitAction.ChooseWeapon1,
     callback: () => {
@@ -95,9 +139,11 @@ export const setUnitControllerTarget = (target) => {
             if (selectedWeaponType !== WeaponType.Machete) {
               selectedWeaponType = WeaponType.Machete;
               currentTarget.useMachete();
+              clearAimState();
             } else {
               selectedWeaponType = WeaponType.Unarmed;
               currentTarget.useUnarmed();
+              clearAimState();
             }
           }
         }, 300);
@@ -108,22 +154,7 @@ export const setUnitControllerTarget = (target) => {
 
   onUnitAction({
     action: UnitAction.ChooseWeapon2,
-    callback: () => {
-      if (!currentTarget.isWeaponChangeTriggered) {
-        setTimeout(() => {
-          if (currentTarget) {
-            if (selectedWeaponType !== WeaponType.Pistol) {
-              selectedWeaponType = WeaponType.Pistol;
-              currentTarget.usePistol();
-            } else {
-              selectedWeaponType = WeaponType.Unarmed;
-              currentTarget.useUnarmed();
-            }
-          }
-        }, 300);
-        currentTarget.isWeaponChangeTriggered = true;
-      }
-    },
+    callback: choosePistol,
   });
 };
 
@@ -148,6 +179,7 @@ export const updateUnitController = ({ now, delta }) => {
       wasWeaponChangeTriggered,
       isWeaponChangeTriggered,
       weaponChangeStartTime,
+      useAim,
     } = currentTarget;
     const { x, y, z } = currentTarget.object.position;
 
@@ -184,12 +216,15 @@ export const updateUnitController = ({ now, delta }) => {
           );
         let velocityMultiplier = 1;
 
-        if (!isMovementBlocked && velocity !== 0) {
-          let targetRotation =
-            cameraRotation.x +
-            Math.PI / 2 +
-            Math.PI +
-            Math.atan2(verticalVelocity, horizontalVelocity);
+        if ((!isMovementBlocked && velocity !== 0) || useAim) {
+          let targetRotation = useAim
+            ? cameraRotation.x
+            : cameraRotation.x +
+              Math.PI / 2 +
+              Math.PI +
+              (velocity === 0 && useAim
+                ? Math.PI / 2
+                : Math.atan2(verticalVelocity, horizontalVelocity));
           let newViewRotation = viewRotation;
           if (newViewRotation < 0) newViewRotation += Math.PI * 2;
           let diff = targetRotation - newViewRotation;
@@ -224,17 +259,61 @@ export const updateUnitController = ({ now, delta }) => {
           if (selectedWeaponType != WeaponType.Unarmed)
             velocityMultiplier *= 0.9;
 
-          let relativeVector = new CANNON.Vec3(
-            Math.sin(Math.PI * 2 - targetRotation) *
-              velocity *
-              velocityMultiplier *
-              delta,
-            0,
-            Math.cos(Math.PI * 2 - targetRotation) *
-              velocity *
-              velocityMultiplier *
-              delta
-          );
+          let noramalizedTargetRotation = Math.PI * 2 - targetRotation;
+          let relativeVector;
+
+          currentTarget.moveBack = unitActionState.backward.value > 0;
+
+          if (useAim) {
+            currentTarget.isSidling =
+              unitActionState.left.pressed || unitActionState.right.pressed;
+            let rotationOffset = 0;
+
+            if (unitActionState.left.value)
+              rotationOffset =
+                unitActionState.forward.value > 0
+                  ? Math.PI / 4
+                  : unitActionState.backward.value > 0
+                  ? Math.PI + -Math.PI / 4
+                  : Math.PI / 2;
+            else if (unitActionState.right.value)
+              rotationOffset =
+                unitActionState.forward.value > 0
+                  ? -Math.PI / 4
+                  : unitActionState.backward.value > 0
+                  ? Math.PI + Math.PI / 4
+                  : -Math.PI / 2;
+            else if (unitActionState.backward.value) rotationOffset = Math.PI;
+
+            currentTarget.sidlingDirection = unitActionState.left.value
+              ? 1
+              : unitActionState.right.value
+              ? -1
+              : 0;
+            relativeVector = new CANNON.Vec3(
+              Math.sin(noramalizedTargetRotation + rotationOffset) *
+                velocity *
+                velocityMultiplier *
+                delta,
+              0,
+              Math.cos(noramalizedTargetRotation + rotationOffset) *
+                velocity *
+                velocityMultiplier *
+                delta
+            );
+          } else {
+            relativeVector = new CANNON.Vec3(
+              Math.sin(noramalizedTargetRotation) *
+                velocity *
+                velocityMultiplier *
+                delta,
+              0,
+              Math.cos(noramalizedTargetRotation) *
+                velocity *
+                velocityMultiplier *
+                delta
+            );
+          }
           physics.position.vadd(relativeVector, physics.position);
         }
 
@@ -246,97 +325,6 @@ export const updateUnitController = ({ now, delta }) => {
           stamina = Math.max(0, stamina - runStaminaCostRatio * delta);
         if (staminaBar) staminaBar.style.width = `${stamina}%`;
         else staminaBar = document.querySelector("#stamina-bar");
-
-        if (
-          unitActionState.forward.pressed ||
-          unitActionState.backward.pressed
-        ) {
-          /* if (unitActionState.left.pressed) {
-            updateTPSCameraRotation({
-              x:
-                -0.01 *
-                unitActionState.left.value *
-                (unitActionState.forward.pressed ? 1 : -1),
-            });
-          } else if (unitActionState.right.pressed) {
-            updateTPSCameraRotation({
-              x:
-                0.01 *
-                unitActionState.right.value *
-                (unitActionState.forward.pressed ? 1 : -1),
-            });
-          } */
-        } else {
-          /*  if (unitActionState.left.pressed) {
-            updateTPSCameraRotation({
-              x: -0.03 * unitActionState.left.value,
-            });
-            users[0].turn = 1;
-          } else if (unitActionState.right.pressed) {
-            updateTPSCameraRotation({
-              x: 0.03 * unitActionState.right.value,
-            });
-            users[0].turn = -1;
-          } */
-          // !!!!!! Sidling
-          /* users[0].isSidling =
-            unitActionState.left.pressed ||
-            unitActionState.right.pressed;
-
-          const sidlingVelocity = users[0].isStanding
-            ? unitActionState.walk.pressed
-              ? unitActionState.backward.pressed
-                ? 0.5
-                : 1.5
-              : unitActionState.backward.pressed
-              ? 0.5
-              : velocity === 0
-              ? 2.5
-              : 1.5
-            : 2;
-          let sidlingRelativeVector = 0;
-          if (unitActionState.left.pressed) {
-            if (velocity !== 0 && tpsCamera) {
-              users[0].targetRotation +=
-                (tpsCamera.getXRotation() - users[0].targetRotation) /
-                (delta * 1000);
-              users[0].physics.quaternion.setFromAxisAngle(
-                new CANNON.Vec3(0, 1, 0),
-                -users[0].targetRotation
-              );
-            }
-
-            sidlingRelativeVector = new CANNON.Vec3(
-              sidlingVelocity * delta,
-              0,
-              0
-            );
-            users[0].sidlingDirection = 1;
-            users[0].physics.quaternion.vmult(
-              sidlingRelativeVector,
-              sidlingRelativeVector
-            );
-            users[0].physics.position.vadd(
-              sidlingRelativeVector,
-              users[0].physics.position
-            );
-          } else if (unitActionState.right.pressed) {
-            sidlingRelativeVector = new CANNON.Vec3(
-              -sidlingVelocity * delta,
-              0,
-              0
-            );
-            users[0].sidlingDirection = -1;
-            users[0].physics.quaternion.vmult(
-              sidlingRelativeVector,
-              sidlingRelativeVector
-            );
-            users[0].physics.position.vadd(
-              sidlingRelativeVector,
-              users[0].physics.position
-            );
-          }*/
-        }
       }
 
       if (isJumpTriggered && isStanding && now - jumpStartTime > jumpTimeout) {

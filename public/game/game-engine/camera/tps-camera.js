@@ -1,25 +1,40 @@
 import { Vector3, Euler } from "../../build/three.module.js";
 
 const TPSCamera = (camera) => {
-  let target, q, mX, mY, distance, lastDistance;
+  let target, q, mX, mY, distance, maxDistance, lastDistance;
+  let positionOffset = new Vector3(0, 0, 0);
+  let normalizedPositionOffset = new Vector3(0, 0, 0);
   const currentPosition = new Vector3();
   const currentLookat = new Vector3();
 
   const calculateOffset = () => {
+    const normalizedDistance = Math.min(distance, maxDistance);
     const idealOffset = new Vector3(
       0,
-      1 + -distance * Math.cos(mY),
-      -distance * Math.sin(mY)
+      1 + -normalizedDistance * Math.cos(mY),
+      -normalizedDistance * Math.sin(mY)
     );
+    const pos = target.position.clone();
+    pos.add(normalizedPositionOffset);
     idealOffset.applyQuaternion(q);
-    idealOffset.add(target.position);
+    idealOffset.add(pos);
     return idealOffset;
   };
 
   const calculateLookat = () => {
     const idealLookat = new Vector3(0, 1, 0);
-    idealLookat.add(target.position);
+    const pos = target.position.clone();
+    pos.add(normalizedPositionOffset);
+    idealLookat.add(pos);
     return idealLookat;
+  };
+
+  const normalizePositionOffset = () => {
+    normalizedPositionOffset.set(
+      positionOffset.x + positionOffset.z * Math.cos(mX),
+      positionOffset.y,
+      positionOffset.z * Math.sin(mX)
+    );
   };
 
   return {
@@ -30,6 +45,8 @@ const TPSCamera = (camera) => {
       mX = -new Euler().setFromQuaternion(q).y;
       mY = 2.4;
       distance = 15;
+      maxDistance = 99;
+      normalizePositionOffset();
     },
     update: ({ x, y, delta }) => {
       if (target) {
@@ -41,6 +58,7 @@ const TPSCamera = (camera) => {
           if (x) {
             q.setFromAxisAngle(new Vector3(0, 1, 0), -mX);
           }
+          normalizePositionOffset();
         } else if (delta) {
           /* const t =
             1.0 -
@@ -67,6 +85,11 @@ const TPSCamera = (camera) => {
     },
     getRotation: () => ({ x: mX, y: mY }),
     setDistance: (d) => (distance = d),
+    setMaxDistance: (d) => (maxDistance = d),
+    setPositionOffset: (o) => {
+      positionOffset = o;
+      normalizePositionOffset();
+    },
   };
 };
 

@@ -51,18 +51,18 @@ export const create = ({
 
   const pistolInHand = getFBXModel(FBXModelId.Pistol);
   pistolInHand.visible = false;
-  pistolInHand.scale.set(0.01, 0.01, 0.01);
+  pistolInHand.scale.set(0.012, 0.012, 0.012);
   pistolInHand.position.x = -0.05;
-  pistolInHand.position.y = 0.08;
-  pistolInHand.position.z = 0.05;
-  pistolInHand.rotation.x = -Math.PI / 3;
-  pistolInHand.rotation.y = 0;
-  pistolInHand.rotation.z = Math.PI / 2;
+  pistolInHand.position.y = 0.15;
+  pistolInHand.position.z = -0.05;
+  pistolInHand.rotation.x = Math.PI / 2 - 0.1;
+  pistolInHand.rotation.y = Math.PI + Math.PI / 2 - 1.6;
+  pistolInHand.rotation.z = Math.PI + Math.PI / 2;
   const attachedPistol = getFBXModel(FBXModelId.Pistol);
-  attachedPistol.scale.set(0.01, 0.01, 0.01);
+  attachedPistol.scale.set(0.012, 0.012, 0.012);
   attachedPistol.position.x = 0.19;
-  attachedPistol.position.y = 0.1;
-  attachedPistol.position.z = 0;
+  attachedPistol.position.y = 0.12;
+  attachedPistol.position.z = -0.02;
   attachedPistol.rotation.x = Math.PI / 2;
   attachedPistol.rotation.y = 0;
   attachedPistol.rotation.z = 0;
@@ -82,7 +82,7 @@ export const create = ({
           child.add(hat);
           child.attach(hat);
         }
-        if (child.name === "Thumb_01001") {
+        if (child.name === "Hand_R") {
           child.add(macheteInHand);
           child.add(pistolInHand);
         }
@@ -109,8 +109,10 @@ export const create = ({
 
       addAnimation(AnimationId.WALK);
       addAnimation(AnimationId.WALK_BACK);
+      addAnimation(AnimationId.WALK_BACK_PISTOL);
       addAnimation(AnimationId.WALK_CROUCH);
       addAnimation(AnimationId.WALK_PISTOL);
+      addAnimation(AnimationId.PISTOL_STRAFE);
       addAnimation(AnimationId.RUN);
       addAnimation(AnimationId.SPRINT);
       addAnimation(AnimationId.RUN_BACK);
@@ -131,6 +133,7 @@ export const create = ({
       addAnimation(AnimationId.SLASH);
       addAnimation(AnimationId.SHOOTING_PISTOL);
       addAnimation(AnimationId.CHANGE_WEAPON);
+      addAnimation(AnimationId.AIM);
 
       activeAction = animations[AnimationId.IDLE];
       activeAction.reset();

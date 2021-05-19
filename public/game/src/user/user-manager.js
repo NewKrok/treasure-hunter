@@ -78,7 +78,6 @@ export const updateUsers = (delta) => {
   const now = Date.now();
   users.forEach((user) => {
     if (user.isOwn) user.updatePositions();
-
     if (user.mixer) {
       const { isStanding } = user;
       setAnimationAction({
@@ -89,6 +88,14 @@ export const updateUsers = (delta) => {
           ? AnimationId.SLASH
           : user.isShootTriggered
           ? AnimationId.SHOOTING_PISTOL
+          : user.useAim && (!user.moveBack || (user.moveBack && user.isSidling))
+          ? user.velocity > 0
+            ? user.isSidling
+              ? user.sidlingDirection == 1
+                ? AnimationId.PISTOL_STRAFE
+                : AnimationId.PISTOL_STRAFE
+              : AnimationId.WALK_PISTOL
+            : AnimationId.AIM
           : user.isWeaponChangeTriggered
           ? AnimationId.CHANGE_WEAPON
           : user.isClimbingUp
@@ -117,18 +124,21 @@ export const updateUsers = (delta) => {
               ? AnimationId.SIDLE_LEFT
               : AnimationId.SIDLE_RIGHT
             : AnimationId.IDLE
-          : user.velocity > 0
+          : (!user.useAim || (user.useAim && !user.moveBack)) &&
+            user.velocity > 0
           ? user.velocity >= 2
             ? user.velocity >= 3
               ? AnimationId.SPRINT
               : AnimationId.RUN
             : AnimationId.WALK
-          : user.velocity < -1
-          ? AnimationId.RUN_BACK
+          : user.velocity < -1 || user.moveBack
+          ? user.useAim
+            ? AnimationId.WALK_BACK_PISTOL
+            : AnimationId.RUN_BACK
           : AnimationId.WALK_BACK,
         transitionTime: now - user.climbEndTime < 500 ? 0 : 0.15,
         loop:
-          !user.isWeaponChangeTriggered &&
+          (!user.isWeaponChangeTriggered || user.velocity > 0 || user.useAim) &&
           !user.isClimbingUp &&
           !user.isDead &&
           now - user.climbEndTime > 300,

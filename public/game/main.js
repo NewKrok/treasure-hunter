@@ -635,10 +635,14 @@ window.createWorld = ({
     loadAnimations({
       [AnimationId.WALK]: "./game/game-assets/3d/animations/walk.fbx",
       [AnimationId.WALK_BACK]: "./game/game-assets/3d/animations/walk-back.fbx",
+      [AnimationId.WALK_BACK_PISTOL]:
+        "./game/game-assets/3d/animations/walk-back-pistol.fbx",
       [AnimationId.WALK_CROUCH]:
         "./game/game-assets/3d/animations/walk-crouch.fbx",
       [AnimationId.WALK_PISTOL]:
         "./game/game-assets/3d/animations/walk-pistol.fbx",
+      [AnimationId.PISTOL_STRAFE]:
+        "./game/game-assets/3d/animations/pistol-strafe.fbx",
       [AnimationId.RUN]: "./game/game-assets/3d/animations/run.fbx",
       [AnimationId.SPRINT]: "./game/game-assets/3d/animations/sprint.fbx",
       [AnimationId.RUN_BACK]: "./game/game-assets/3d/animations/run-back.fbx",
@@ -669,6 +673,7 @@ window.createWorld = ({
         "./game/game-assets/3d/animations/shooting-pistol.fbx",
       [AnimationId.CHANGE_WEAPON]:
         "./game/game-assets/3d/animations/change-weapon.fbx",
+      [AnimationId.AIM]: "./game/game-assets/3d/animations/idle-pistol.fbx",
     }).then(
       () => {
         physicsWorld = createPhysicsWorld();

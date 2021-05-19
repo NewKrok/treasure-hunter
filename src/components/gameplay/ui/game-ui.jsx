@@ -16,6 +16,10 @@ const GameUI = () => {
     <div className={styles.Wrapper}>
       <Tooltips />
       <StaminaBar />
+      <div className={styles.Crosshairs}>
+        {" "}
+        <div className={styles.CrosshairsHelper} />
+      </div>
     </div>
   );
 };
