@@ -207,6 +207,7 @@ export const create = ({
           landingStartTime: 0,
           viewRotation: 0,
           targetRotation: 0,
+          pistolInHand,
           useMachete: () => {
             resetAssetVisibilities();
             macheteInHand.visible = true;

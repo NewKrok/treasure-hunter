@@ -698,7 +698,7 @@ window.createWorld = ({
             onComplete: (user) => {
               //outlinePass.selectedObjects = [user.object];
               setCameraTarget(user.object);
-              setUnitControllerTarget(user);
+              setUnitControllerTarget({ target: user, physicsWorld });
               onUnitAction({
                 action: UnitAction.Interaction,
                 callback: () => collectChest({ scene, physicsWorld }),

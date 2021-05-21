@@ -69,7 +69,7 @@ export const updateTPSCameraRotation = ({ x, y }) =>
 
 export const useAimZoom = () => {
   if (tpsCamera) {
-    tpsCamera.setMaxDistance(4);
+    tpsCamera.setMaxDistance(1.2);
     tpsCamera.setPositionOffset(new Vector3(0, 0, -0.5));
   }
 };

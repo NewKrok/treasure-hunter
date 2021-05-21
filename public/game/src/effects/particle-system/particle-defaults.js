@@ -41,7 +41,7 @@ const defaultParticleSystemFragmentShader = `
   }
 `;
 
-const createdParticleSystems = [];
+let createdParticleSystems = [];
 
 export const createParticleSystem = ({
   map,
@@ -137,11 +137,27 @@ export const createParticleSystem = ({
   const particleSystem = new THREE.Points(geometry, material);
   particleSystem.sortParticles = true;
 
-  createdParticleSystems.push({ particleSystem, onUpdate });
+  createdParticleSystems.push({
+    particleSystem,
+    onUpdate,
+    creationTime: Date.now(),
+  });
   return particleSystem;
 };
 
-export const updateParticleSystems = ({ delta, elapsed }) =>
-  createdParticleSystems.forEach(({ onUpdate, particleSystem }) =>
-    onUpdate({ particleSystem, delta, elapsed })
+export const destroyParticleSystem = (particleSystem) => {
+  createdParticleSystems = createdParticleSystems.filter(
+    (entry) => entry != particleSystem
   );
+
+  particleSystem.geometry.dispose();
+  particleSystem.material.dispose();
+  particleSystem.parent.remove(particleSystem);
+};
+
+export const updateParticleSystems = ({ delta, elapsed }) => {
+  const now = Date.now();
+  createdParticleSystems.forEach(({ onUpdate, particleSystem, creationTime }) =>
+    onUpdate({ particleSystem, delta, elapsed, lifeTime: now - creationTime })
+  );
+};

@@ -1,9 +1,9 @@
-const ballShape = new CANNON.Sphere(0.15);
+const ballShape = new CANNON.Sphere(0.05);
 const ballGeometry = new THREE.SphereGeometry(ballShape.radius, 16, 16);
-const shootVelo = 18;
-const characterRadius = 1;
+const shootVelo = 35;
+const characterRadius = 2.5;
 const directionVector = new THREE.Vector3();
-const material = new THREE.MeshLambertMaterial({ color: 0xdddddd });
+const material = new THREE.MeshLambertMaterial({ color: 0xffff00 });
 
 let balls = [];
 let ballIndex = 0;
@@ -17,13 +17,13 @@ function getShootDir({ targetVec, physics, camera }) {
     vector.sub(physics.position).normalize()
   );
   targetVec.x = ray.direction.x;
-  targetVec.y = ray.direction.y + 0.15;
+  targetVec.y = ray.direction.y;
   targetVec.z = ray.direction.z;
 }
 
 export const shoot = ({ user, camera, physicsWorld, scene }) => {
   var x = user.physics.position.x;
-  var y = user.physics.position.y;
+  var y = user.physics.position.y + 0.6;
   var z = user.physics.position.z;
   var ballBody = new CANNON.Body({ mass: 1 });
   ballBody.addShape(ballShape);
@@ -53,7 +53,7 @@ export const shoot = ({ user, camera, physicsWorld, scene }) => {
 };
 
 export const updateBullets = ({ scene, physicsWorld }) => {
-  balls.forEach((ball, index) => {
+  balls.forEach((ball) => {
     if (ball.body) {
       ball.mesh.position.copy(ball.body.position);
       ball.mesh.quaternion.copy(ball.body.quaternion);

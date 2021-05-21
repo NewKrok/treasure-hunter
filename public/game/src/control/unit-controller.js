@@ -1,8 +1,13 @@
+import { Vector3 } from "../../build/three.module.js";
 import {
   getTPSCameraRotation,
   useAimZoom,
   disableAimZoom,
+  getCamera,
 } from "../../game-engine/camera/camera.js";
+import { ParticleCollection } from "../effects/particle-system/particle-collection.js";
+import { destroyParticleSystem } from "../effects/particle-system/particle-defaults.js";
+import { shoot } from "../user/bullet-manager.js";
 import {
   onUnitAction,
   UnitAction,
@@ -43,33 +48,35 @@ const clearAimState = () => {
   currentTarget.useAim = false;
 };
 
-export const setUnitControllerTarget = (target) => {
+export const setUnitControllerTarget = ({ target, physicsWorld }) => {
   currentTarget = target;
 
   onUnitAction({
     action: UnitAction.Jump,
     callback: () => {
-      const now = Date.now();
-      if (currentTarget.isStanding) {
-        currentTarget.isStanding = false;
-        currentTarget.isJumpTriggered = true;
-        currentTarget.physics.velocity.y =
-          stamina >= jumpStaminaCost
-            ? unitActionState.run.pressed
-              ? jumpForceDuringRun
-              : jumpForceDuringWalk
-            : (stamina / jumpStaminaCost) * jumpForceDuringWalk;
-        stamina = Math.max(0, stamina - jumpStaminaCost);
-      } else if (
-        currentTarget.isHanging &&
-        (!currentTarget.isClimbingUp ||
-          (currentTarget.isClimbingUp &&
-            now - currentTarget.climbStartTime < 1500))
-      ) {
-        currentTarget.isHanging = false;
-        currentTarget.cancelHangingTime = now;
+      if (!currentTarget.isShootTriggered) {
+        const now = Date.now();
+        if (currentTarget.isStanding) {
+          currentTarget.isStanding = false;
+          currentTarget.isJumpTriggered = true;
+          currentTarget.physics.velocity.y =
+            stamina >= jumpStaminaCost
+              ? unitActionState.run.pressed
+                ? jumpForceDuringRun
+                : jumpForceDuringWalk
+              : (stamina / jumpStaminaCost) * jumpForceDuringWalk;
+          stamina = Math.max(0, stamina - jumpStaminaCost);
+        } else if (
+          currentTarget.isHanging &&
+          (!currentTarget.isClimbingUp ||
+            (currentTarget.isClimbingUp &&
+              now - currentTarget.climbStartTime < 1500))
+        ) {
+          currentTarget.isHanging = false;
+          currentTarget.cancelHangingTime = now;
+        }
+        clearAimState();
       }
-      if (currentTarget.useAim) clearAimState();
     },
   });
 
@@ -92,6 +99,34 @@ export const setUnitControllerTarget = (target) => {
       ) {
         currentTarget.isShootTriggered = true;
         stamina = Math.max(0, stamina - shootStaminaCost);
+
+        setTimeout(() => {
+          shoot({
+            user: currentTarget,
+            camera: getCamera(),
+            physicsWorld,
+            scene: currentTarget.object.parent,
+          });
+
+          var position = new Vector3();
+          position
+            .copy(new Vector3(0, 0, 1))
+            .applyQuaternion(currentTarget.pistolInHand.quaternion);
+          position = currentTarget.pistolInHand
+            .getWorldPosition(new Vector3())
+            .add(new Vector3(0, -0.2, 0))
+            .add(position.multiplyScalar(0.3));
+          var rotation = currentTarget.object.rotation.y - Math.PI / 2;
+          const effect = ParticleCollection.createShootEffect({
+            position: position,
+            angle:
+              currentTarget.object.rotation.x === 0
+                ? Math.PI * 2 - rotation
+                : rotation,
+          });
+          currentTarget.object.parent.add(effect);
+          setTimeout(() => destroyParticleSystem(effect), 500);
+        }, 200);
       }
     },
   });
@@ -314,7 +349,8 @@ export const updateUnitController = ({ now, delta }) => {
                 delta
             );
           }
-          physics.position.vadd(relativeVector, physics.position);
+          if (!isMovementBlocked)
+            physics.position.vadd(relativeVector, physics.position);
         }
 
         currentTarget.velocity = velocity;

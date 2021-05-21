@@ -6,6 +6,7 @@ import { ParticleCollection } from "./effects/particle-system/particle-collectio
 import { groundContactMaterial } from "./physics/physics.js";
 import { hideTooltip, showTooltip } from "./tooltips.js";
 import { createColliderByObject } from "./utils/cannon-utils.js";
+import { destroyParticleSystem } from "./effects/particle-system/particle-defaults.js";
 
 let chests = [];
 let selectedChest;
@@ -73,9 +74,7 @@ export const collectChest = ({ scene, physicsWorld }) => {
   if (selectedChest) {
     const { object, collider, effect } = selectedChest;
 
-    effect.geometry.dispose();
-    effect.material.dispose();
-    effect.parent.remove(effect);
+    destroyParticleSystem(effect);
 
     const removeChest = () => {
       object.parent.remove(object);
