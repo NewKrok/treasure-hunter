@@ -2,6 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 
 import StaminaBar from "./stamina-bar/stamina-bar";
+import Crosshairs from "./crosshairs/crosshairs";
 import Tooltips from "./tooltips/tooltips";
 import { pauseGame } from "../../../store/actions/ingame-action";
 
@@ -16,10 +17,7 @@ const GameUI = () => {
     <div className={styles.Wrapper}>
       <Tooltips />
       <StaminaBar />
-      <div className={styles.Crosshairs}>
-        {" "}
-        <div className={styles.CrosshairsHelper} />
-      </div>
+      <Crosshairs />
     </div>
   );
 };

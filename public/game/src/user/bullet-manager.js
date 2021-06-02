@@ -1,79 +1,100 @@
-const ballShape = new CANNON.Sphere(0.05);
-const ballGeometry = new THREE.SphereGeometry(ballShape.radius, 16, 16);
-const shootVelo = 35;
-const characterRadius = 2.5;
-const directionVector = new THREE.Vector3();
+import { Raycaster, Vector3 } from "../../build/three.module.js";
+import { ParticleCollection } from "../effects/particle-system/particle-collection.js";
+
+const bulletShape = new CANNON.Sphere(0.02);
+const bulletGeometry = new THREE.SphereGeometry(bulletShape.radius, 8, 8);
+const shootVelocity = 0.8;
 const material = new THREE.MeshLambertMaterial({ color: 0xffff00 });
 
-let balls = [];
-let ballIndex = 0;
+let bullets = [];
+let bulletIndex = 0;
 
-function getShootDir({ targetVec, physics, camera }) {
-  var vector = targetVec;
-  targetVec.set(0, 0, 1);
-  vector.unproject(camera);
+function getShootDir({ physics, camera }) {
+  const directionVector = new THREE.Vector3();
+  directionVector.set(0, 0, 1);
+  directionVector.unproject(camera);
   var ray = new THREE.Ray(
     physics.position,
-    vector.sub(physics.position).normalize()
+    directionVector.sub(physics.position).normalize()
   );
-  targetVec.x = ray.direction.x;
-  targetVec.y = ray.direction.y;
-  targetVec.z = ray.direction.z;
+  directionVector.x = ray.direction.x;
+  directionVector.y = ray.direction.y;
+  directionVector.z = ray.direction.z;
+
+  return directionVector;
 }
 
-export const shoot = ({ user, camera, physicsWorld, scene }) => {
-  var x = user.physics.position.x;
-  var y = user.physics.position.y + 0.6;
-  var z = user.physics.position.z;
-  var ballBody = new CANNON.Body({ mass: 1 });
-  ballBody.addShape(ballShape);
-  var ballMesh = new THREE.Mesh(ballGeometry, material);
-  physicsWorld.add(ballBody);
-  scene.add(ballMesh);
-  ballMesh.castShadow = true;
-  ballMesh.receiveShadow = false;
-  balls.push({
-    id: user.name + "/" + ballIndex++,
-    bornTime: Date.now(),
-    body: ballBody,
-    mesh: ballMesh,
-  });
+export const shoot = ({ user, camera, scene }) => {
+  const x = user.physics.position.x;
+  const y = user.physics.position.y + 0.6;
+  const z = user.physics.position.z;
+  const direction = getShootDir({ physics: user.physics, camera });
 
-  getShootDir({ targetVec: directionVector, physics: user.physics, camera });
-  ballBody.velocity.set(
-    directionVector.x * shootVelo,
-    directionVector.y * shootVelo,
-    directionVector.z * shootVelo
+  const bulletMesh = new THREE.Mesh(bulletGeometry, material);
+  bulletMesh.castShadow = true;
+  bulletMesh.receiveShadow = false;
+  bulletMesh.position.set(x, y, z);
+  scene.add(bulletMesh);
+
+  /* var arrow = new THREE.ArrowHelper(
+    direction,
+    new Vector3(0, 0, 0),
+    3,
+    Math.random() * 0xffffff
   );
-  x += directionVector.x * (characterRadius + ballShape.radius);
-  y += directionVector.y * (characterRadius + ballShape.radius);
-  z += directionVector.z * (characterRadius + ballShape.radius);
-  ballBody.position.set(x, y, z);
-  ballMesh.position.set(x, y, z);
+  bulletMesh.add(arrow); */
+
+  bullets.push({
+    id: user.name + "/" + bulletIndex++,
+    bornTime: Date.now(),
+    mesh: bulletMesh,
+    direction,
+  });
 };
 
-export const updateBullets = ({ scene, physicsWorld }) => {
-  balls.forEach((ball) => {
-    if (ball.body) {
-      ball.mesh.position.copy(ball.body.position);
-      ball.mesh.quaternion.copy(ball.body.quaternion);
+export const updateBullets = ({ scene, colliders }) => {
+  const bulletsToRemove = [];
+
+  bullets.forEach(({ mesh, direction }) => {
+    const { x, y, z } = mesh.position;
+    const targetPos = mesh.position.clone();
+    const maxOffset = shootVelocity;
+
+    if (targetPos) {
+      const raycaster = new Raycaster(targetPos, direction, 0, maxOffset);
+      const intersects = raycaster.intersectObjects(colliders);
+
+      if (intersects.length === 0) {
+        mesh.position.set(
+          x + direction.x * maxOffset,
+          y + direction.y * maxOffset,
+          z + direction.z * maxOffset
+        );
+      } else {
+        //console.log(intersects[0]);
+        console.log(intersects.length);
+        mesh.position.copy(intersects[0].point);
+        const effect = ParticleCollection.createShootHitEffect(mesh.position);
+        scene.add(effect);
+        bulletsToRemove.push(mesh);
+      }
     }
   });
 
   const now = Date.now();
-  balls = balls.filter((ball) => {
-    const old = now - ball.bornTime > 2000;
-    if (old) {
-      scene.remove(ball.mesh);
-      if (ball.body) physicsWorld.remove(ball.body);
+  bullets = bullets.filter(({ mesh, bornTime }) => {
+    const old = now - bornTime > 50000;
+    const isCollided = bulletsToRemove.includes(mesh);
+    if (old || isCollided) {
+      scene.remove(mesh);
     }
 
-    return !old;
+    return !old && !isCollided;
   });
 };
 
 export const syncBulletPosition = ({ id, bulletId, position, scene }) => {
-  const bullet = balls.find((b) => b.id === id);
+  const bullet = bullets.find((b) => b.id === id);
   if (bullet) {
     if (bullet.positionTween) bullet.positionTween.kill();
     bullet.positionTween = gsap.to(
@@ -88,25 +109,25 @@ export const syncBulletPosition = ({ id, bulletId, position, scene }) => {
     );
   } else {
     var { x, y, z } = position;
-    var ballMesh = new THREE.Mesh(ballGeometry, material);
-    scene.add(ballMesh);
-    ballMesh.castShadow = true;
-    ballMesh.receiveShadow = false;
-    ballMesh.position.x = x;
-    ballMesh.position.y = y;
-    ballMesh.position.z = z;
-    balls.push({
+    var bulletMesh = new THREE.Mesh(ballGeometry, material);
+    scene.add(bulletMesh);
+    bulletMesh.castShadow = true;
+    bulletMesh.receiveShadow = false;
+    bulletMesh.position.x = x;
+    bulletMesh.position.y = y;
+    bulletMesh.position.z = z;
+    bullets.push({
       bulletId,
       id,
       bornTime: Date.now(),
-      mesh: ballMesh,
+      mesh: bulletMesh,
     });
   }
 };
 
 export const syncOwnBullet = ({ serverCall, isStarted }) => {
   const now = Date.now();
-  balls.forEach((bullet) => {
+  bullets.forEach((bullet) => {
     if (
       isStarted &&
       bullet.body &&
@@ -145,4 +166,4 @@ export const syncOwnBullet = ({ serverCall, isStarted }) => {
   });
 };
 
-export const getBullets = () => balls;
+export const getBullets = () => bullets;

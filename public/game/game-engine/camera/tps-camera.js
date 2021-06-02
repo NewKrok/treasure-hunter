@@ -1,14 +1,12 @@
 import { Vector3, Euler } from "../../build/three.module.js";
 
 const TPSCamera = (camera) => {
-  let target, q, mX, mY, distance, maxDistance, lastDistance;
+  let target, q, mX, mY, distance, maxDistance, currentDistance;
   let positionOffset = new Vector3(0, 0, 0);
   let normalizedPositionOffset = new Vector3(0, 0, 0);
-  const currentPosition = new Vector3();
-  const currentLookat = new Vector3();
 
   const calculateOffset = () => {
-    const normalizedDistance = Math.min(distance, maxDistance);
+    const normalizedDistance = Math.min(currentDistance, maxDistance);
     const idealOffset = new Vector3(
       0,
       1 + -normalizedDistance * Math.cos(mY),
@@ -45,6 +43,7 @@ const TPSCamera = (camera) => {
       mX = -new Euler().setFromQuaternion(q).y;
       mY = 2.4;
       distance = 15;
+      currentDistance = distance;
       maxDistance = 99;
       normalizePositionOffset();
     },
@@ -60,36 +59,28 @@ const TPSCamera = (camera) => {
           }
           normalizePositionOffset();
         } else if (delta) {
-          /* const t =
-            1.0 -
-            Math.pow(
-              lastDistance > distance ? 0.00000000000000000000001 : 0.001,
-              delta
-            ); */
-
-          /*const idealOffset = calculateOffset();
-          const idealLookat = calculateLookat();
-
-          currentPosition.lerp(idealOffset, t);
-          currentLookat.lerp(idealLookat, t);
-
-          camera.position.copy(currentPosition);
-          camera.lookAt(currentLookat);*/
-
           camera.position.copy(calculateOffset());
           camera.lookAt(calculateLookat());
 
-          lastDistance = distance;
+          currentDistance = THREE.Math.lerp(
+            currentDistance,
+            distance,
+            distance < currentDistance ? 0.1 : 0.05
+          );
         }
       }
     },
     getRotation: () => ({ x: mX, y: mY }),
-    setDistance: (d) => (distance = d),
+    setDistance: (d, useLerp = true) => {
+      distance = d;
+      if (!useLerp) currentDistance = distance;
+    },
     setMaxDistance: (d) => (maxDistance = d),
     setPositionOffset: (o) => {
       positionOffset = o;
       normalizePositionOffset();
     },
+    getLookAtPosition: () => camera.quaternion,
   };
 };
 

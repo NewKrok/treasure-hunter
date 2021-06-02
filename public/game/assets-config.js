@@ -39,6 +39,7 @@ export const TextureId = {
   Particle: "particle",
   Smoke: "smoke",
   SmokeBig: "smoke-big",
+  Noise1: "noise-1",
 };
 
 export const FBXModelId = {
@@ -92,6 +93,10 @@ export const assetConfig = {
     {
       url: "./game/game-assets/textures/effects/smoke-big.jpg",
       id: TextureId.SmokeBig,
+    },
+    {
+      url: "./game/game-assets/textures/effects/noise-1.jpg",
+      id: TextureId.Noise1,
     },
   ],
   fbxModels: [

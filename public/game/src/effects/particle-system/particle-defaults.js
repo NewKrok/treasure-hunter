@@ -147,7 +147,8 @@ export const createParticleSystem = ({
 
 export const destroyParticleSystem = (particleSystem) => {
   createdParticleSystems = createdParticleSystems.filter(
-    (entry) => entry != particleSystem
+    ({ particleSystem: savedParticleSystem }) =>
+      savedParticleSystem !== particleSystem
   );
 
   particleSystem.geometry.dispose();

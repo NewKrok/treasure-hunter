@@ -90,6 +90,7 @@ let climbUpBlockers = [];
 let climbLeftBlockers = [];
 let climbRightBlockers = [];
 const enemies = {};
+const colliders = [];
 
 const sharedData = {
   state: STATE.WAITING_FOR_START,
@@ -296,6 +297,10 @@ const loadLevel = (onLoaded) => {
               physicsWorld.add(collider);
               if (!child.userData.isCameraBlocker)
                 registerCameraCollider(child);
+              colliders.push(child);
+            } else if (child.name.includes("Camera-Blocker")) {
+              child.visible = false;
+              registerCameraCollider(child);
             } else if (child.name.includes("Enemy")) {
               const rawData = child.name.split("|");
               const key = rawData[0];
@@ -338,13 +343,21 @@ const loadLevel = (onLoaded) => {
               lavaMaterial = child.material;
               lavaMaterial.onBeforeCompile = (shader) => {
                 shader.uniforms.time = { value: 0 };
-                shader.vertexShader =
-                  "uniform float time;\n" + shader.vertexShader;
+                shader.uniforms.noiseTexture = {
+                  value: getTexture(TextureId.Noise1),
+                };
+                shader.vertexShader = [
+                  "uniform sampler2D noiseTexture;",
+                  "uniform float time;",
+                  shader.vertexShader,
+                ].join("\n");
+
                 shader.vertexShader = shader.vertexShader.replace(
                   "#include <project_vertex>",
                   [
                     "#include <project_vertex>",
-                    "vec4 modelViewPosition = modelViewMatrix * vec4(position.x + (sin(time * 0.2) * cos(time * 0.2) * 0.01), position.y * 1.2, position.z * 1.1, 1.0);",
+                    "vec4 noise = texture2D(noiseTexture, vec2(64.0 * cos(time * 0.002) * cos(position.x) * cos(position.y), 64.0 * sin(time * 0.002) * sin(position.z) * cos(position.z)));",
+                    "vec4 modelViewPosition = modelViewMatrix * vec4(position.x + (sin(time * 0.2) * cos(time * 0.2) * 0.01), position.y + noise.x * 0.5, position.z * 1.1, 1.0);",
                     "gl_Position = projectionMatrix * modelViewPosition;",
                   ].join("\n")
                 );
@@ -356,6 +369,7 @@ const loadLevel = (onLoaded) => {
                     "\n"
                   )
                 );
+
                 lavaMaterial.userData.shader = shader;
               };
             } else {
@@ -420,9 +434,10 @@ function onWindowResize() {
 const checkCollisions = ({ users, bullets }) => {
   const markedUsers = [];
   const markedBullets = [];
+  const ownUser = getOwnUser();
   if (users && users.length > 0 && bullets && bullets.length > 0)
     users.forEach((user) => {
-      if (user.object && user.object.visible)
+      if (user.object && user.object.visible && user != ownUser)
         bullets.forEach((bullet) => {
           if (bullet.mesh.visible && user.object && bullet.body) {
             const userPosition = user.object.position;
@@ -438,18 +453,6 @@ const checkCollisions = ({ users, bullets }) => {
           }
         });
     });
-
-  markedUsers.forEach((user) => {
-    user.object.visible = false;
-    _serverCall({
-      header: "respawn",
-      data: {
-        id: user.id,
-        targetName: user.name,
-        killerName: getOwnUser().name,
-      },
-    });
-  });
 
   markedBullets.forEach((bullet) => {
     bullet.mesh.visible = false;
@@ -493,7 +496,7 @@ const animate = () => {
   updateDoors(user);
 
   physicsWorld.step(delta);
-  updateBullets({ scene, physicsWorld });
+  updateBullets({ scene, colliders });
 
   if (users) {
     Object.keys(enemies).forEach((key) => {
@@ -772,7 +775,7 @@ window.touchController = {
 };
 window.actions = {
   jump: () => controls.jump(),
-  shoot: () => shoot({ user: getOwnUser(), camera, physicsWorld, scene }),
+  shoot: () => shoot({ user: getOwnUser(), camera, scene }),
 };
 
 // data gets an extra id param automatically by the server

@@ -35,8 +35,8 @@ export const create = ({
   macheteInHand.visible = false;
   macheteInHand.scale.set(0.007, 0.007, 0.007);
   macheteInHand.position.x = 0.06;
-  macheteInHand.position.y = 0.06;
-  macheteInHand.position.z = 0.04;
+  macheteInHand.position.y = 0.1;
+  macheteInHand.position.z = -0.02;
   macheteInHand.rotation.x = -Math.PI / 2;
   macheteInHand.rotation.y = -Math.PI / 2;
   macheteInHand.rotation.z = Math.PI / 2;
@@ -67,6 +67,10 @@ export const create = ({
   attachedPistol.rotation.y = 0;
   attachedPistol.rotation.z = 0;
 
+  let spine = null;
+  let handL = null;
+  let handR = null;
+
   objLoader.load(
     "./game/game-assets/3d/characters/adventurer-1.fbx",
     (object) => {
@@ -74,21 +78,37 @@ export const create = ({
       object.position.set(position.x, position.y, position.z);
 
       object.traverse((child) => {
+        console.log(child);
         if (child.isMesh) {
           child.material.map = getTexture(TextureId.AdventurerTexture);
           child.castShadow = true;
         }
-        if (child.name === "Head_end") {
-          child.add(hat);
-          child.attach(hat);
-        }
-        if (child.name === "Hand_R") {
-          child.add(macheteInHand);
-          child.add(pistolInHand);
-        }
-        if (child.name === "Hips") {
-          child.add(attachedMachete);
-          child.add(attachedPistol);
+        switch (child.name) {
+          case "Head_end":
+            child.add(hat);
+            child.attach(hat);
+            break;
+
+          case "Hand_L":
+            handL = child;
+            break;
+
+          case "Hand_R":
+            child.add(macheteInHand);
+            child.add(pistolInHand);
+            handR = child;
+            break;
+
+          case "Hips":
+            child.add(attachedMachete);
+            child.add(attachedPistol);
+            break;
+
+          case "Spine_01":
+            spine = child;
+            break;
+
+          default:
         }
       });
 
@@ -231,6 +251,11 @@ export const create = ({
               body.quaternion.z,
               body.quaternion.w
             );
+          },
+          updateLookAtRotation: (rotation) => {
+            // if (Math.random() > 0.99) console.log(rotation.x);
+            spine.quaternion.x = -rotation.x;
+            // handL.quaternion.setFromEuler();
           },
         });
     }

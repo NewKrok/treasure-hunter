@@ -26,6 +26,9 @@ let climbableAreas = [];
 let isMovementBlocked = false;
 let selectedWeaponType = WeaponType.Unarmed;
 
+const speed = 3;
+const runningSpeed = 4.75;
+
 const jumpForceDuringWalk = 8;
 const jumpForceDuringRun = 10;
 
@@ -42,6 +45,7 @@ const shootTimeout = 500;
 const weaponChangeTimeout = 600;
 
 let staminaBar = null;
+let crosshairs = null;
 
 const clearAimState = () => {
   disableAimZoom();
@@ -101,13 +105,6 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
         stamina = Math.max(0, stamina - shootStaminaCost);
 
         setTimeout(() => {
-          shoot({
-            user: currentTarget,
-            camera: getCamera(),
-            physicsWorld,
-            scene: currentTarget.object.parent,
-          });
-
           var position = new Vector3();
           position
             .copy(new Vector3(0, 0, 1))
@@ -119,13 +116,20 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
           var rotation = currentTarget.object.rotation.y - Math.PI / 2;
           const effect = ParticleCollection.createShootEffect({
             position: position,
-            angle:
+            direction:
               currentTarget.object.rotation.x === 0
                 ? Math.PI * 2 - rotation
                 : rotation,
           });
           currentTarget.object.parent.add(effect);
-          setTimeout(() => destroyParticleSystem(effect), 500);
+          shoot({
+            user: currentTarget,
+            bulletStartPosition: position,
+            camera: getCamera(),
+            physicsWorld,
+            scene: currentTarget.object.parent,
+          });
+          setTimeout(() => destroyParticleSystem(effect), 1000);
         }, 200);
       }
     },
@@ -242,7 +246,7 @@ export const updateUnitController = ({ now, delta }) => {
           (unitActionState.left.value > unitActionState.right.value ? 1 : -1);
 
         const velocity =
-          (stamina > 0 && unitActionState.run.pressed ? 4.5 : 2) *
+          (stamina > 0 && unitActionState.run.pressed ? runningSpeed : speed) *
           Math.max(
             unitActionState.forward.value,
             unitActionState.backward.value,
@@ -361,6 +365,9 @@ export const updateUnitController = ({ now, delta }) => {
           stamina = Math.max(0, stamina - runStaminaCostRatio * delta);
         if (staminaBar) staminaBar.style.width = `${stamina}%`;
         else staminaBar = document.querySelector("#stamina-bar");
+
+        if (crosshairs) crosshairs.style.opacity = currentTarget.useAim ? 1 : 0;
+        else crosshairs = document.querySelector("#crosshairs");
       }
 
       if (isJumpTriggered && isStanding && now - jumpStartTime > jumpTimeout) {

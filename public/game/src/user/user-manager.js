@@ -1,6 +1,7 @@
 import { AnimationId } from "../../assets-config.js";
 import { create } from "./user.js";
 import { STATE } from "../../main.js";
+import { getTPSCameraLookAtPosition } from "../../game-engine/camera/camera.js";
 
 const users = [];
 
@@ -66,7 +67,6 @@ export const addUser = ({
       useDebugRender,
       onComplete: (user) => {
         users.push(user);
-        console.log(users.length);
         if (isOwn) ownUser = user;
         if (onComplete) onComplete(user);
       },
@@ -77,7 +77,9 @@ export const addUser = ({
 export const updateUsers = (delta) => {
   const now = Date.now();
   users.forEach((user) => {
-    if (user.isOwn) user.updatePositions();
+    if (user.isOwn) {
+      user.updatePositions();
+    }
     if (user.mixer) {
       const { isStanding } = user;
       setAnimationAction({
@@ -126,8 +128,8 @@ export const updateUsers = (delta) => {
             : AnimationId.IDLE
           : (!user.useAim || (user.useAim && !user.moveBack)) &&
             user.velocity > 0
-          ? user.velocity >= 2
-            ? user.velocity >= 3
+          ? user.velocity >= 3
+            ? user.velocity >= 4
               ? AnimationId.SPRINT
               : AnimationId.RUN
             : AnimationId.WALK
@@ -144,6 +146,7 @@ export const updateUsers = (delta) => {
           now - user.climbEndTime > 300,
       });
       user.mixer.update(delta);
+      user.updateLookAtRotation(getTPSCameraLookAtPosition());
       if (user.isJumpTriggered && !user.wasJumpTriggered) {
         user.jumpStartTime = now;
         user.wasJumpTriggered = true;

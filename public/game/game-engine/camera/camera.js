@@ -10,6 +10,7 @@ const cameraColliders = [];
 
 let tpsCamera;
 let perspectiveCamera;
+let isAimZoomEnabled = false;
 
 export const createCamera = () => {
   perspectiveCamera = new PerspectiveCamera(
@@ -34,11 +35,12 @@ export const updateCamera = (delta) => {
       targetPos.y += 1;
       const vector = new Vector3(0, 0, 1);
       vector.applyQuaternion(getCamera().quaternion);
-      const raycaster = new Raycaster(targetPos, vector, 0, 10);
+      const maxDistance = isAimZoomEnabled ? 1.2 : 8;
+      const raycaster = new Raycaster(targetPos, vector, 0, maxDistance);
       const intersects = raycaster.intersectObjects(cameraColliders);
 
       if (intersects.length > 0) {
-        let distance = 8;
+        let distance = maxDistance;
         for (let i = 0; i < intersects.length; i++) {
           distance =
             intersects[i].distance < distance
@@ -46,8 +48,11 @@ export const updateCamera = (delta) => {
               : distance;
           distance *= 0.9;
         }
-        tpsCamera?.setDistance(Math.min(Math.floor(distance * 1000) / 1000, 8));
-      } else tpsCamera?.setDistance(8);
+        tpsCamera?.setDistance(
+          Math.min(Math.floor(distance * 1000) / 1000, maxDistance),
+          false
+        );
+      } else tpsCamera?.setDistance(maxDistance);
 
       tpsCamera.update({ delta });
     }
@@ -69,18 +74,18 @@ export const updateTPSCameraRotation = ({ x, y }) =>
 
 export const useAimZoom = () => {
   if (tpsCamera) {
-    tpsCamera.setMaxDistance(1.2);
+    isAimZoomEnabled = true;
     tpsCamera.setPositionOffset(new Vector3(0, 0, -0.5));
   }
 };
 
 export const disableAimZoom = () => {
   if (tpsCamera) {
-    tpsCamera.setMaxDistance(99);
+    isAimZoomEnabled = false;
     tpsCamera.setPositionOffset(new Vector3(0, 0, 0));
   }
 };
 
 export const getTPSCameraRotation = () => tpsCamera.getRotation();
-
+export const getTPSCameraLookAtPosition = () => tpsCamera.getLookAtPosition();
 export const getCamera = () => perspectiveCamera;
