@@ -1,7 +1,8 @@
-import { AnimationId } from "../../assets-config.js";
+import { AnimationId, AudioId } from "../../assets-config.js";
 import { create } from "./user.js";
 import { STATE } from "../../main.js";
-import { getTPSCameraLookAtPosition } from "../../game-engine/camera/camera.js";
+import { getTPSCameraRotation } from "../../game-engine/camera/camera.js";
+import { getAudio } from "../../game-engine/assets/assets.js";
 
 const users = [];
 
@@ -146,7 +147,7 @@ export const updateUsers = (delta) => {
           now - user.climbEndTime > 300,
       });
       user.mixer.update(delta);
-      user.updateLookAtRotation(getTPSCameraLookAtPosition());
+      user.updateLookAtRotation(getTPSCameraRotation());
       if (user.isJumpTriggered && !user.wasJumpTriggered) {
         user.jumpStartTime = now;
         user.wasJumpTriggered = true;
@@ -167,6 +168,10 @@ export const updateUsers = (delta) => {
         user.wasLanded = true;
         user.landingStartTime = now;
         user.wasJumpTriggered = false;
+
+        const landingSoundFx = getAudio(AudioId.Landing);
+        if (landingSoundFx.isPlaying) landingSoundFx.stop();
+        landingSoundFx.play();
       }
       if (!isStanding) user.wasLanded = false;
     }
@@ -238,6 +243,25 @@ const setAnimationAction = ({
       user.activeAction.clampWhenFinished = true;
     }
     user.activeAction.play();
+
+    /*if (user.audio.walkSoundFx)
+       if (
+        [
+          AnimationId.WALK_PISTOL,
+          AnimationId.PISTOL_STRAFE,
+          AnimationId.WALK,
+          AnimationId.WALK_BACK_PISTOL,
+          AnimationId.RUN,
+          AnimationId.SPRINT,
+        ].includes(user.activeAnimation)
+      ) {
+        if (!user.audio.walkSoundFx.isPlaying) {
+          user.audio.walkSoundFx.play();
+        } else {
+          user.audio.walkSoundFx.playbackRate = 0.1; //user.velocity / 4.75;
+        }
+      } else if (user.audio.walkSoundFx.isPlaying)
+        user.audio.walkSoundFx.stop(); */
   }
 };
 

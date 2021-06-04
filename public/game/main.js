@@ -96,8 +96,10 @@ let climbLeftBlockers = [];
 let climbRightBlockers = [];
 const enemies = {};
 const colliders = [];
+const bulletColliders = [];
 
 export const getColliders = () => colliders;
+export const getBulletColliders = () => bulletColliders;
 
 const sharedData = {
   state: STATE.WAITING_FOR_START,
@@ -300,8 +302,10 @@ const loadLevel = (onLoaded) => {
                 material: groundContactMaterial,
               });
               physicsWorld.add(collider);
-              if (!child.userData.isCameraBlocker)
+              if (!child.userData.isCameraBlocker) {
+                bulletColliders.push(child);
                 registerCameraCollider(child);
+              }
               colliders.push(child);
             } else if (child.name.includes("Camera-Blocker")) {
               child.visible = false;
@@ -330,10 +334,12 @@ const loadLevel = (onLoaded) => {
                 y: child.position.y,
                 z: child.position.z,
               });
+              if (child.visible) bulletColliders.push(child);
             } else if (child.name.includes("chest")) {
               registerChest({ element: child, physicsWorld, scene });
             } else if (child.name.includes("door")) {
               registerDoorElement({ element: child, physicsWorld });
+              bulletColliders.push(child);
             } else if (child.name.includes("fire")) {
               child.visible = false;
               const effect = ParticleCollection.createFireEffect({
@@ -505,7 +511,7 @@ const animate = () => {
   updateDoors(user);
 
   physicsWorld.step(delta);
-  updateBullets({ scene, colliders });
+  updateBullets({ scene });
 
   if (users) {
     Object.keys(enemies).forEach((key) => {

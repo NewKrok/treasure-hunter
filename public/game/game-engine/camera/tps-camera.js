@@ -2,6 +2,8 @@ import { Vector3, Euler } from "../../build/three.module.js";
 
 const TPSCamera = (camera) => {
   let target, q, mX, mY, distance, maxDistance, currentDistance;
+  let minY = 1.2;
+  let maxY = 2.7;
   let positionOffset = new Vector3(0, 0, 0);
   let normalizedPositionOffset = new Vector3(0, 0, 0);
 
@@ -52,8 +54,8 @@ const TPSCamera = (camera) => {
         if (x || y) {
           mX += x || 0;
           mY += y || 0;
-          mY = Math.max(1.2, mY);
-          mY = Math.min(2.7, mY);
+          mY = Math.max(minY, mY);
+          mY = Math.min(maxY, mY);
           if (x) {
             q.setFromAxisAngle(new Vector3(0, 1, 0), -mX);
           }
@@ -76,11 +78,14 @@ const TPSCamera = (camera) => {
       if (!useLerp) currentDistance = distance;
     },
     setMaxDistance: (d) => (maxDistance = d),
+    setYBoundaries: ({ min, max }) => {
+      minY = min || minY;
+      maxY = max || maxY;
+    },
     setPositionOffset: (o) => {
       positionOffset = o;
       normalizePositionOffset();
     },
-    getLookAtPosition: () => camera.quaternion,
   };
 };
 

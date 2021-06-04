@@ -51,6 +51,11 @@ export const FBXModelId = {
 
 export const AudioId = {
   GameBackground: "GameBackground",
+  Landing: "Landing",
+  PistolHit: "PistolHit",
+  PistolShot: "PistolShot",
+  FootStep: "FootStep",
+  Switch: "Switch",
 };
 
 export const MaterialId = {
@@ -127,6 +132,31 @@ export const assetConfig = {
       url: "./game/game-assets/audio/music/final-storm.ogg",
       id: AudioId.GameBackground,
       loop: true,
+    },
+    {
+      url: "./game/game-assets/audio/fx/jump-5.ogg",
+      id: AudioId.Landing,
+      loop: false,
+    },
+    {
+      url: "./game/game-assets/audio/fx/pistol-shot-03.ogg",
+      id: AudioId.PistolHit,
+      loop: false,
+    },
+    {
+      url: "./game/game-assets/audio/fx/revolver-shot-03.ogg",
+      id: AudioId.PistolShot,
+      loop: false,
+    },
+    {
+      url: "./game/game-assets/audio/fx/stone-footstep-10.ogg",
+      id: AudioId.FootStep,
+      loop: true,
+    },
+    {
+      url: "./game/game-assets/audio/fx/switch-sounds-19.ogg",
+      id: AudioId.Switch,
+      loop: false,
     },
   ],
 };

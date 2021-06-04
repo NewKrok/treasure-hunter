@@ -97,6 +97,7 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
         stamina = Math.max(0, stamina - slashStaminaCost);
       } else if (
         currentTarget.isStanding &&
+        currentTarget.useAim &&
         !currentTarget.isShootTriggered &&
         selectedWeaponType === WeaponType.Pistol &&
         stamina >= shootStaminaCost

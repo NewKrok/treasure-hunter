@@ -2,10 +2,16 @@ import { FBXLoader } from "../../lib/jsm/loaders/FBXLoader.js";
 import { AnimationMixer, Object3D } from "../../build/three.module.js";
 import {
   getAnimation,
+  getAudio,
   getFBXModel,
   getTexture,
 } from "../../game-engine/assets/assets.js";
-import { AnimationId, FBXModelId, TextureId } from "../../assets-config.js";
+import {
+  AnimationId,
+  AudioId,
+  FBXModelId,
+  TextureId,
+} from "../../assets-config.js";
 import { characterContactMaterial } from "../physics/physics.js";
 
 export const create = ({
@@ -166,6 +172,8 @@ export const create = ({
       activeAction.play();
       scene.add(object);
 
+      const walkSoundFx = getAudio(AudioId.FootStep);
+
       const mass = 5;
       const radius = 0.3;
       const shape = new CANNON.Sphere(radius);
@@ -197,6 +205,7 @@ export const create = ({
           name,
           position,
           object: object,
+          audio: { walkSoundFx },
           calculateBoundingBox: () => ({
             minX: object.position.x - 0.1,
             maxX: object.position.x + 0.1,
@@ -261,7 +270,7 @@ export const create = ({
           },
           updateLookAtRotation: (rotation) => {
             // if (Math.random() > 0.99) console.log(rotation.x);
-            spine.quaternion.x = -rotation.x;
+            spine.rotation.x = rotation.y - Math.PI / 2;
             // handL.quaternion.setFromEuler();
           },
         });
