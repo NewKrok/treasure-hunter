@@ -1,7 +1,9 @@
 import { Raycaster, Vector3 } from "../../build/three.module.js";
+import { getColliders } from "../../main.js";
 import { ParticleCollection } from "../effects/particle-system/particle-collection.js";
+import { destroyParticleSystem } from "../effects/particle-system/particle-defaults.js";
 
-const bulletShape = new CANNON.Sphere(0.02);
+const bulletShape = new CANNON.Sphere(0.01);
 const bulletGeometry = new THREE.SphereGeometry(bulletShape.radius, 8, 8);
 const shootVelocity = 0.8;
 const material = new THREE.MeshLambertMaterial({ color: 0xffff00 });
@@ -9,46 +11,49 @@ const material = new THREE.MeshLambertMaterial({ color: 0xffff00 });
 let bullets = [];
 let bulletIndex = 0;
 
-function getShootDir({ physics, camera }) {
-  const directionVector = new THREE.Vector3();
-  directionVector.set(0, 0, 1);
-  directionVector.unproject(camera);
-  var ray = new THREE.Ray(
-    physics.position,
-    directionVector.sub(physics.position).normalize()
-  );
-  directionVector.x = ray.direction.x;
-  directionVector.y = ray.direction.y;
-  directionVector.z = ray.direction.z;
-
-  return directionVector;
-}
-
 export const shoot = ({ user, camera, scene }) => {
-  const x = user.physics.position.x;
-  const y = user.physics.position.y + 0.6;
-  const z = user.physics.position.z;
-  const direction = getShootDir({ physics: user.physics, camera });
+  const bulletPosition = user.bulletSlot.getWorldPosition(new Vector3());
+  const raycaster = new Raycaster(
+    camera.getWorldPosition(new Vector3()),
+    camera.getWorldDirection(new Vector3()),
+    0,
+    100
+  );
+  const intersects = raycaster.intersectObjects(getColliders());
+  let direction;
+  if (intersects.length > 0) {
+    direction = new Vector3()
+      .subVectors(intersects[0].point, bulletPosition)
+      .normalize();
+  } else {
+    direction = new Vector3()
+      .subVectors(
+        camera
+          .getWorldPosition(new Vector3())
+          .addScaledVector(camera.getWorldDirection(new Vector3()), 20),
+        bulletPosition
+      )
+      .normalize();
+  }
 
   const bulletMesh = new THREE.Mesh(bulletGeometry, material);
   bulletMesh.castShadow = true;
   bulletMesh.receiveShadow = false;
-  bulletMesh.position.set(x, y, z);
+  bulletMesh.position.copy(bulletPosition);
   scene.add(bulletMesh);
 
-  /* var arrow = new THREE.ArrowHelper(
+  const bulletEffect = ParticleCollection.createBulletEffect({
+    position: new Vector3(),
     direction,
-    new Vector3(0, 0, 0),
-    3,
-    Math.random() * 0xffffff
-  );
-  bulletMesh.add(arrow); */
+  });
+  bulletMesh.add(bulletEffect);
 
   bullets.push({
     id: user.name + "/" + bulletIndex++,
     bornTime: Date.now(),
     mesh: bulletMesh,
     direction,
+    bulletEffect,
   });
 };
 
@@ -71,8 +76,6 @@ export const updateBullets = ({ scene, colliders }) => {
           z + direction.z * maxOffset
         );
       } else {
-        //console.log(intersects[0]);
-        console.log(intersects.length);
         mesh.position.copy(intersects[0].point);
         const effect = ParticleCollection.createShootHitEffect(mesh.position);
         scene.add(effect);
@@ -82,11 +85,12 @@ export const updateBullets = ({ scene, colliders }) => {
   });
 
   const now = Date.now();
-  bullets = bullets.filter(({ mesh, bornTime }) => {
+  bullets = bullets.filter(({ mesh, bornTime, bulletEffect }) => {
     const old = now - bornTime > 50000;
     const isCollided = bulletsToRemove.includes(mesh);
     if (old || isCollided) {
       scene.remove(mesh);
+      setTimeout(() => destroyParticleSystem(bulletEffect), 100);
     }
 
     return !old && !isCollided;

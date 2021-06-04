@@ -141,6 +141,7 @@ export const createParticleSystem = ({
     particleSystem,
     onUpdate,
     creationTime: Date.now(),
+    iterationCount: 0,
   });
   return particleSystem;
 };
@@ -158,7 +159,14 @@ export const destroyParticleSystem = (particleSystem) => {
 
 export const updateParticleSystems = ({ delta, elapsed }) => {
   const now = Date.now();
-  createdParticleSystems.forEach(({ onUpdate, particleSystem, creationTime }) =>
-    onUpdate({ particleSystem, delta, elapsed, lifeTime: now - creationTime })
+  createdParticleSystems.forEach(
+    ({ onUpdate, particleSystem, creationTime, iterationCount }) =>
+      onUpdate({
+        particleSystem,
+        delta,
+        elapsed,
+        lifeTime: now - creationTime,
+        iterationCount: iterationCount + 1,
+      })
   );
 };

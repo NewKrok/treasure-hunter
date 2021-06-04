@@ -1,5 +1,5 @@
 import { FBXLoader } from "../../lib/jsm/loaders/FBXLoader.js";
-import { AnimationMixer } from "../../build/three.module.js";
+import { AnimationMixer, Object3D } from "../../build/three.module.js";
 import {
   getAnimation,
   getFBXModel,
@@ -58,6 +58,12 @@ export const create = ({
   pistolInHand.rotation.x = Math.PI / 2 - 0.1;
   pistolInHand.rotation.y = Math.PI + Math.PI / 2 - 1.6;
   pistolInHand.rotation.z = Math.PI + Math.PI / 2;
+
+  const bulletSlot = new Object3D();
+  pistolInHand.add(bulletSlot);
+  bulletSlot.position.y = 10;
+  bulletSlot.position.z = 20;
+
   const attachedPistol = getFBXModel(FBXModelId.Pistol);
   attachedPistol.scale.set(0.012, 0.012, 0.012);
   attachedPistol.position.x = 0.19;
@@ -228,6 +234,7 @@ export const create = ({
           viewRotation: 0,
           targetRotation: 0,
           pistolInHand,
+          bulletSlot,
           useMachete: () => {
             resetAssetVisibilities();
             macheteInHand.visible = true;

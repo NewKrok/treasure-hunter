@@ -114,14 +114,17 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
             .add(new Vector3(0, -0.2, 0))
             .add(position.multiplyScalar(0.3));
           var rotation = currentTarget.object.rotation.y - Math.PI / 2;
+          var direction =
+            currentTarget.object.rotation.x === 0
+              ? Math.PI * 2 - rotation
+              : rotation;
           const effect = ParticleCollection.createShootEffect({
-            position: position,
-            direction:
-              currentTarget.object.rotation.x === 0
-                ? Math.PI * 2 - rotation
-                : rotation,
+            position,
+            direction,
           });
           currentTarget.object.parent.add(effect);
+          setTimeout(() => destroyParticleSystem(effect), 1000);
+
           shoot({
             user: currentTarget,
             bulletStartPosition: position,
@@ -129,7 +132,6 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
             physicsWorld,
             scene: currentTarget.object.parent,
           });
-          setTimeout(() => destroyParticleSystem(effect), 1000);
         }, 200);
       }
     },

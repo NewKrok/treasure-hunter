@@ -1,6 +1,6 @@
 import { MaterialId } from "../../assets-config.js";
 import { MeshPhysicalMaterial } from "../../build/three.module.js";
-import { loadFBXModels, loadTextures } from "./loaders.js";
+import { loadAudio, loadFBXModels, loadTextures } from "./loaders.js";
 
 const animations = {};
 export const registerAnimation = ({ key, animation }) =>
@@ -15,6 +15,10 @@ export const getFBXModel = (id) => fbxModels[id].clone();
 const textures = {};
 export const registerTexture = ({ id, texture }) => (textures[id] = texture);
 export const getTexture = (id) => textures[id];
+
+const audioList = {};
+export const registerAudio = ({ id, audio }) => (audioList[id] = audio);
+export const getAudio = (id) => audioList[id];
 
 const materials = {};
 const createMaterial = ({ key, map }) => {
@@ -34,7 +38,7 @@ const createMaterial = ({ key, map }) => {
 };
 export const getMaterial = (key, map = null) => createMaterial({ key, map });
 
-export const preload = ({ textures, fbxModels }) =>
+export const preload = ({ textures, fbxModels, audio }) =>
   new Promise((resolve, reject) => {
     loadTextures(textures)
       .then((loadedTextures) => {
@@ -45,7 +49,18 @@ export const preload = ({ textures, fbxModels }) =>
           .then((loadedModels) => {
             loadedModels.forEach((element) => registerFBXModel(element));
             console.log(`FBX Models(${loadedModels.length}) are loaded...`);
-            resolve();
+
+            loadAudio(audio)
+              .then((loadedAudio) => {
+                loadedAudio.forEach((element) => registerAudio(element));
+                console.log(`Audio files(${loadedAudio.length}) are loaded...`);
+                resolve();
+              })
+              .catch((error) =>
+                console.log(
+                  `Fatal error during FBX model preloader phase: ${error}`
+                )
+              );
           })
           .catch((error) =>
             console.log(

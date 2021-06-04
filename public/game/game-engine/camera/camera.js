@@ -75,7 +75,7 @@ export const updateTPSCameraRotation = ({ x, y }) =>
 export const useAimZoom = () => {
   if (tpsCamera) {
     isAimZoomEnabled = true;
-    tpsCamera.setPositionOffset(new Vector3(0, 0, -0.5));
+    tpsCamera.setPositionOffset(new Vector3(0, 0.2, -0.5));
   }
 };
 

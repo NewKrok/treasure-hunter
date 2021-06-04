@@ -37,6 +37,7 @@ export const TextureId = {
   SkyBox5: "sky-box-5",
   SkyBox6: "sky-box-6",
   Particle: "particle",
+  Trail: "trail",
   Smoke: "smoke",
   SmokeBig: "smoke-big",
   Noise1: "noise-1",
@@ -46,6 +47,10 @@ export const FBXModelId = {
   Hat1: "hat-1",
   Machete: "machete",
   Pistol: "pistol",
+};
+
+export const AudioId = {
+  GameBackground: "GameBackground",
 };
 
 export const MaterialId = {
@@ -87,6 +92,10 @@ export const assetConfig = {
       id: TextureId.Particle,
     },
     {
+      url: "./game/game-assets/textures/effects/trail-55.png",
+      id: TextureId.Trail,
+    },
+    {
       url: "./game/game-assets/textures/effects/smoke.jpg",
       id: TextureId.Smoke,
     },
@@ -111,6 +120,13 @@ export const assetConfig = {
     {
       url: "./game/game-assets/3d/items/pistol.fbx",
       id: FBXModelId.Pistol,
+    },
+  ],
+  audio: [
+    {
+      url: "./game/game-assets/audio/music/final-storm.ogg",
+      id: AudioId.GameBackground,
+      loop: true,
     },
   ],
 };

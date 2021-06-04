@@ -28,8 +28,13 @@ import {
   getBullets,
 } from "./src/user/bullet-manager.js";
 
-import { getTexture, preload } from "./game-engine/assets/assets.js";
-import { assetConfig, TextureId, AnimationId } from "./assets-config.js";
+import { getAudio, getTexture, preload } from "./game-engine/assets/assets.js";
+import {
+  assetConfig,
+  TextureId,
+  AnimationId,
+  AudioId,
+} from "./assets-config.js";
 import { teamLevels } from "./level-config.js";
 import { loadAnimations } from "./game-engine/assets/animation-preloader.js";
 import { calculateBoundingBox, intersect } from "./src/utils/threejs-utils.js";
@@ -91,6 +96,8 @@ let climbLeftBlockers = [];
 let climbRightBlockers = [];
 const enemies = {};
 const colliders = [];
+
+export const getColliders = () => colliders;
 
 const sharedData = {
   state: STATE.WAITING_FOR_START,
@@ -156,9 +163,7 @@ const initThreeJS = () => {
 
   const renderPass = new RenderPass(scene, camera);
 
-  // atm it doesn't work with skinned mesh :/
-  // https://discourse.threejs.org/t/dof-bokeh-pass-with-animated-gltf/23794
-  /* const bokehPass = new BokehPass(scene, camera, {
+  const bokehPass = new BokehPass(scene, camera, {
     focus: 10.0,
     aperture: 0.0002,
     maxblur: 0.01,
@@ -166,7 +171,7 @@ const initThreeJS = () => {
     width: window.innerWidth,
     height: window.innerHeight,
   });
-  bokehPass.materialDepth.skinning = true; */
+  bokehPass.materialDepth.skinning = true;
 
   outlinePass = new OutlinePass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -181,7 +186,7 @@ const initThreeJS = () => {
 
   composer.addPass(renderPass);
   //composer.addPass(outlinePass);
-  //composer.addPass(bokehPass);
+  composer.addPass(bokehPass);
 
   postprocessing.composer = composer;
   //postprocessing.bokeh = bokehPass;
@@ -349,6 +354,7 @@ const loadLevel = (onLoaded) => {
                 shader.vertexShader = [
                   "uniform sampler2D noiseTexture;",
                   "uniform float time;",
+                  "varying vec4 noiseOut;",
                   shader.vertexShader,
                 ].join("\n");
 
@@ -356,18 +362,21 @@ const loadLevel = (onLoaded) => {
                   "#include <project_vertex>",
                   [
                     "#include <project_vertex>",
-                    "vec4 noise = texture2D(noiseTexture, vec2(64.0 * cos(time * 0.002) * cos(position.x) * cos(position.y), 64.0 * sin(time * 0.002) * sin(position.z) * cos(position.z)));",
-                    "vec4 modelViewPosition = modelViewMatrix * vec4(position.x + (sin(time * 0.2) * cos(time * 0.2) * 0.01), position.y + noise.x * 0.5, position.z * 1.1, 1.0);",
+                    "vec4 noise = texture2D(noiseTexture, vec2(64.0 * cos(time * 0.001) * cos(position.x) * cos(position.y), 64.0 * sin(time * 0.001) * sin(position.z) * cos(position.z)));",
+                    "vec4 modelViewPosition = modelViewMatrix * vec4(position.x + (sin(time * 0.02) * cos(time * 0.02) * 0.01), position.y + noise.x * 0.5, position.z * 1.1, 1.0);",
                     "gl_Position = projectionMatrix * modelViewPosition;",
+                    "noiseOut = noise;",
                   ].join("\n")
                 );
-                shader.fragmentShader =
-                  "uniform float time;\n" + shader.fragmentShader;
+
+                shader.fragmentShader = [
+                  "uniform float time;",
+                  "varying vec4 noiseOut;",
+                  shader.fragmentShader,
+                ].join("\n");
                 shader.fragmentShader = shader.fragmentShader.replace(
                   "}",
-                  ["gl_FragColor *= 1.0 + (1.0 + sin(time)) * 0.5;", "}"].join(
-                    "\n"
-                  )
+                  ["gl_FragColor *= noiseOut.x;", "}"].join("\n")
                 );
 
                 lavaMaterial.userData.shader = shader;
@@ -745,6 +754,9 @@ window.createWorld = ({
               },
             });
           };
+
+          const backgroundMusic = getAudio(AudioId.GameBackground);
+          backgroundMusic.play();
 
           Object.keys(enemies).forEach((key) => {
             runEnemyLogic(enemies[key]);
