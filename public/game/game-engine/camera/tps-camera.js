@@ -81,6 +81,8 @@ const TPSCamera = (camera) => {
     setYBoundaries: ({ min, max }) => {
       minY = min || minY;
       maxY = max || maxY;
+      mY = Math.max(minY, mY);
+      mY = Math.min(maxY, mY);
     },
     setPositionOffset: (o) => {
       positionOffset = o;

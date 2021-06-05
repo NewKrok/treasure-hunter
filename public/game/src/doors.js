@@ -1,10 +1,11 @@
 import { Vector3 } from "../build/three.module.js";
 
 import { AudioId, MaterialId } from "../assets-config.js";
-import { getAudio, getMaterial } from "../game-engine/assets/assets.js";
+import { getMaterial } from "../game-engine/assets/assets.js";
 import { registerCameraCollider } from "../game-engine/camera/camera.js";
 import { groundContactMaterial } from "./physics/physics.js";
 import { createColliderByObject } from "./utils/cannon-utils.js";
+import { playAudio } from "../game-engine/audio/audio.js";
 
 const doors = {};
 
@@ -65,10 +66,10 @@ export const updateDoors = (user) => {
       !door.isOpen &&
       door?.switch?.position.distanceTo(user.object.position) < 0.5
     ) {
-      const switchSoundFx = getAudio(AudioId.Switch);
-      if (switchSoundFx.isPlaying) switchSoundFx.stop();
-      switchSoundFx.play();
-
+      playAudio({
+        audioId: AudioId.Switch,
+        cacheId: AudioId.Switch,
+      });
       openDoor(door);
     }
   });

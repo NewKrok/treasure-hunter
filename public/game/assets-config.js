@@ -52,9 +52,14 @@ export const FBXModelId = {
 export const AudioId = {
   GameBackground: "GameBackground",
   Landing: "Landing",
+  Jump: "Jump",
   PistolHit: "PistolHit",
   PistolShot: "PistolShot",
   FootStep: "FootStep",
+  Aim: "Aim",
+  ChangeToPistol: "ChangeToPistol",
+  ChangeToMachete: "ChangeToMachete",
+  MacheteAttack: "MacheteAttack",
   Switch: "Switch",
 };
 
@@ -131,32 +136,70 @@ export const assetConfig = {
     {
       url: "./game/game-assets/audio/music/final-storm.ogg",
       id: AudioId.GameBackground,
-      loop: true,
     },
     {
       url: "./game/game-assets/audio/fx/jump-5.ogg",
       id: AudioId.Landing,
-      loop: false,
     },
     {
-      url: "./game/game-assets/audio/fx/pistol-shot-03.ogg",
+      url: "./game/game-assets/audio/fx/male-jump-3.ogg",
+      id: AudioId.Jump,
+    },
+    {
+      url: "./game/game-assets/audio/fx/concrete-7.ogg",
       id: AudioId.PistolHit,
-      loop: false,
     },
     {
       url: "./game/game-assets/audio/fx/revolver-shot-03.ogg",
       id: AudioId.PistolShot,
-      loop: false,
     },
     {
-      url: "./game/game-assets/audio/fx/stone-footstep-10.ogg",
+      url: "./game/game-assets/audio/fx/stone-footstep-8.ogg",
       id: AudioId.FootStep,
-      loop: true,
     },
     {
       url: "./game/game-assets/audio/fx/switch-sounds-19.ogg",
       id: AudioId.Switch,
-      loop: false,
+    },
+    {
+      url: "./game/game-assets/audio/fx/cloth-item-ripped-2.ogg",
+      id: AudioId.Aim,
+    },
+    {
+      url: "./game/game-assets/audio/fx/weapon-swap-3.ogg",
+      id: AudioId.ChangeToPistol,
+    },
+    {
+      url: "./game/game-assets/audio/fx/sword-woosh-2.ogg",
+      id: AudioId.ChangeToMachete,
+    },
+    {
+      url: "./game/game-assets/audio/fx/sword-woosh-10.ogg",
+      id: AudioId.MacheteAttack,
     },
   ],
+};
+
+export const audioConfig = {
+  [AudioId.GameBackground]: {
+    loop: true,
+  },
+  [AudioId.FootStep]: {
+    volume: 0.2,
+  },
+  [AudioId.Switch]: {
+    volume: 0.5,
+  },
+  [AudioId.Landing]: {
+    volume: 0.5,
+  },
+  [AudioId.Jump]: {
+    volume: 0.2,
+  },
+  [AudioId.ChangeToPistol]: {
+    volume: 0.5,
+  },
+  [AudioId.Aim]: {
+    volume: 0.1,
+  },
 };

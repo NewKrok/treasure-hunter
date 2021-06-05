@@ -1,4 +1,6 @@
+import { AudioId } from "../../assets-config.js";
 import { Vector3 } from "../../build/three.module.js";
+import { playAudio } from "../../game-engine/audio/audio.js";
 import {
   getTPSCameraRotation,
   useAimZoom,
@@ -36,7 +38,7 @@ let stamina = 100;
 const staminaRegenerationRatio = 20;
 const jumpStaminaCost = 10;
 const slashStaminaCost = 30;
-const shootStaminaCost = 25;
+const shootStaminaCost = 15;
 const runStaminaCostRatio = 30;
 
 const jumpTimeout = 200;
@@ -70,6 +72,10 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
                 : jumpForceDuringWalk
               : (stamina / jumpStaminaCost) * jumpForceDuringWalk;
           stamina = Math.max(0, stamina - jumpStaminaCost);
+          playAudio({
+            audioId: AudioId.Jump,
+            cacheId: AudioId.Jump,
+          });
         } else if (
           currentTarget.isHanging &&
           (!currentTarget.isClimbingUp ||
@@ -95,6 +101,13 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
       ) {
         currentTarget.isSlashTriggered = true;
         stamina = Math.max(0, stamina - slashStaminaCost);
+
+        setTimeout(() => {
+          playAudio({
+            audioId: AudioId.MacheteAttack,
+            cacheId: AudioId.MacheteAttack,
+          });
+        }, 250);
       } else if (
         currentTarget.isStanding &&
         currentTarget.useAim &&
@@ -145,6 +158,11 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
           if (selectedWeaponType !== WeaponType.Pistol) {
             selectedWeaponType = WeaponType.Pistol;
             currentTarget.usePistol();
+
+            playAudio({
+              audioId: AudioId.ChangeToPistol,
+              cacheId: AudioId.ChangeToPistol,
+            });
           } else {
             selectedWeaponType = WeaponType.Unarmed;
             currentTarget.useUnarmed();
@@ -152,6 +170,12 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
           }
         }
       }, 500);
+      if (selectedWeaponType === WeaponType.Pistol) {
+        playAudio({
+          audioId: AudioId.ChangeToPistol,
+          cacheId: AudioId.ChangeToPistol,
+        });
+      }
       currentTarget.isWeaponChangeTriggered = true;
     }
   };
@@ -159,29 +183,39 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
   onUnitAction({
     action: UnitAction.Aim,
     callback: () => {
-      const zoom = () => {
-        currentTarget.useAim = !currentTarget.useAim;
-        if (currentTarget.useAim) useAimZoom();
-        else clearAimState();
-      };
+      if (currentTarget.isStanding) {
+        const zoom = () => {
+          currentTarget.useAim = !currentTarget.useAim;
+          if (currentTarget.useAim) useAimZoom();
+          else clearAimState();
+          playAudio({
+            audioId: AudioId.Aim,
+            cacheId: AudioId.Aim,
+          });
+        };
 
-      if (selectedWeaponType !== WeaponType.Pistol) {
-        choosePistol();
-        setTimeout(zoom, 500);
-      } else zoom();
+        if (selectedWeaponType !== WeaponType.Pistol) {
+          choosePistol();
+          setTimeout(zoom, 500);
+        } else zoom();
+      }
     },
   });
 
   onUnitAction({
     action: UnitAction.ChooseWeapon1,
     callback: () => {
-      if (!currentTarget.isWeaponChangeTriggered) {
+      if (!currentTarget.isWeaponChangeTriggered && currentTarget.isStanding) {
         setTimeout(() => {
           if (currentTarget) {
             if (selectedWeaponType !== WeaponType.Machete) {
               selectedWeaponType = WeaponType.Machete;
               currentTarget.useMachete();
               clearAimState();
+              playAudio({
+                audioId: AudioId.ChangeToMachete,
+                cacheId: AudioId.ChangeToMachete,
+              });
             } else {
               selectedWeaponType = WeaponType.Unarmed;
               currentTarget.useUnarmed();
@@ -189,6 +223,12 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
             }
           }
         }, 300);
+        if (selectedWeaponType === WeaponType.Machete) {
+          playAudio({
+            audioId: AudioId.ChangeToMachete,
+            cacheId: AudioId.ChangeToMachete,
+          });
+        }
         currentTarget.isWeaponChangeTriggered = true;
       }
     },
@@ -196,11 +236,15 @@ export const setUnitControllerTarget = ({ target, physicsWorld }) => {
 
   onUnitAction({
     action: UnitAction.ChooseWeapon2,
-    callback: choosePistol,
+    callback: () => {
+      if (!currentTarget.isWeaponChangeTriggered && currentTarget.isStanding) {
+        choosePistol();
+      }
+    },
   });
 };
 
-export const addClimbableAreas = (areas) => (climbableAreas = areas);
+export const addClimbableArea = (area) => climbableAreas.push(area);
 
 export const updateUnitController = ({ now, delta }) => {
   if (currentTarget) {
@@ -222,6 +266,7 @@ export const updateUnitController = ({ now, delta }) => {
       isWeaponChangeTriggered,
       weaponChangeStartTime,
       useAim,
+      cancelHangingTime,
     } = currentTarget;
     const { x, y, z } = currentTarget.object.position;
 
@@ -404,17 +449,37 @@ export const updateUnitController = ({ now, delta }) => {
         currentTarget.isWeaponChangeTriggered = false;
       }
 
-      const hangingInfo = climbableAreas.find(
-        ({ area }) =>
+      const hangingInfo = climbableAreas.find(({ area }) => {
+        /*if (Math.random() > 0.99)
+          console.log(
+            unitActionState.jump.pressed,
+            now - cancelHangingTime > 200,
+            x > area.x + area.min.x - 0.55,
+            x < area.x + area.max.x + 0.55,
+            y + 1.5 > area.y + area.min.y,
+            y + 1.5 < area.y + area.max.y,
+            z > area.z + area.min.z - 0.55,
+            z < area.z + area.max.z + 0.55,
+            unitActionState.jump.pressed &&
+              now - cancelHangingTime > 200 &&
+              x > area.x + area.min.x - 0.55 &&
+              x < area.x + area.max.x + 0.55 &&
+              y + 1.5 > area.y + area.min.y &&
+              // y + 1.5 < area.y + area.max.y &&
+          //z > area.z + area.min.z - 0.55 && 
+              z < area.z + area.max.z + 0.55
+          );*/
+        return (
           unitActionState.jump.pressed &&
-          now - users[0].cancelHangingTime > 200 &&
+          now - cancelHangingTime > 200 &&
           x > area.x + area.min.x - 0.55 &&
           x < area.x + area.max.x + 0.55 &&
           y + 1.5 > area.y + area.min.y &&
-          y + 1.5 < area.y + area.max.y &&
-          z > area.z + area.min.z - 0.55 &&
+          /* y + 1.5 < area.y + area.max.y &&
+          z > area.z + area.min.z - 0.55 && */
           z < area.z + area.max.z + 0.55
-      );
+        );
+      });
       currentTarget.climbingUpDirection = hangingInfo?.direction;
       currentTarget.isHanging = hangingInfo;
 
@@ -423,6 +488,8 @@ export const updateUnitController = ({ now, delta }) => {
           new CANNON.Vec3(0, 1, 0),
           (hangingInfo.direction * Math.PI) / 180
         );
+        physics.position.x = hangingInfo.area.x;
+        physics.position.y = hangingInfo.area.y - 1.4;
       }
     }
   }

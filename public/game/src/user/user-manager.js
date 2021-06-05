@@ -2,7 +2,13 @@ import { AnimationId, AudioId } from "../../assets-config.js";
 import { create } from "./user.js";
 import { STATE } from "../../main.js";
 import { getTPSCameraRotation } from "../../game-engine/camera/camera.js";
-import { getAudio } from "../../game-engine/assets/assets.js";
+import {
+  getAudioCache,
+  playAudio,
+  stopAudio,
+} from "../../game-engine/audio/audio.js";
+import { ParticleCollection } from "../effects/particle-system/particle-collection.js";
+import { destroyParticleSystem } from "../effects/particle-system/particle-defaults.js";
 
 const users = [];
 
@@ -80,6 +86,30 @@ export const updateUsers = (delta) => {
   users.forEach((user) => {
     if (user.isOwn) {
       user.updatePositions();
+
+      if (
+        [
+          AnimationId.WALK_PISTOL,
+          AnimationId.PISTOL_STRAFE,
+          AnimationId.WALK,
+          AnimationId.WALK_BACK_PISTOL,
+          AnimationId.RUN,
+          AnimationId.SPRINT,
+        ].includes(user.activeAnimation)
+      ) {
+        const { lastPlayedTime } = getAudioCache(AudioId.FootStep);
+        if (now - lastPlayedTime > (4.75 / user.velocity) * 250) {
+          playAudio({
+            audioId: AudioId.FootStep,
+            cacheId: AudioId.FootStep,
+          });
+          const effect = ParticleCollection.createStepEffect(
+            user.object.position
+          );
+          user.object.parent.add(effect);
+          setTimeout(() => destroyParticleSystem(effect), 500);
+        }
+      } else stopAudio(AudioId.FootStep);
     }
     if (user.mixer) {
       const { isStanding } = user;
@@ -147,7 +177,9 @@ export const updateUsers = (delta) => {
           now - user.climbEndTime > 300,
       });
       user.mixer.update(delta);
-      user.updateLookAtRotation(getTPSCameraRotation());
+      user.updateLookAtRotation(
+        user.useAim ? getTPSCameraRotation() : { y: Math.PI / 2 }
+      );
       if (user.isJumpTriggered && !user.wasJumpTriggered) {
         user.jumpStartTime = now;
         user.wasJumpTriggered = true;
@@ -169,9 +201,13 @@ export const updateUsers = (delta) => {
         user.landingStartTime = now;
         user.wasJumpTriggered = false;
 
-        const landingSoundFx = getAudio(AudioId.Landing);
-        if (landingSoundFx.isPlaying) landingSoundFx.stop();
-        landingSoundFx.play();
+        playAudio({ audioId: AudioId.Landing, cacheId: AudioId.Landing });
+
+        const effect = ParticleCollection.createLandingEffect(
+          user.object.position
+        );
+        user.object.parent.add(effect);
+        setTimeout(() => destroyParticleSystem(effect), 1000);
       }
       if (!isStanding) user.wasLanded = false;
     }
@@ -243,25 +279,6 @@ const setAnimationAction = ({
       user.activeAction.clampWhenFinished = true;
     }
     user.activeAction.play();
-
-    /*if (user.audio.walkSoundFx)
-       if (
-        [
-          AnimationId.WALK_PISTOL,
-          AnimationId.PISTOL_STRAFE,
-          AnimationId.WALK,
-          AnimationId.WALK_BACK_PISTOL,
-          AnimationId.RUN,
-          AnimationId.SPRINT,
-        ].includes(user.activeAnimation)
-      ) {
-        if (!user.audio.walkSoundFx.isPlaying) {
-          user.audio.walkSoundFx.play();
-        } else {
-          user.audio.walkSoundFx.playbackRate = 0.1; //user.velocity / 4.75;
-        }
-      } else if (user.audio.walkSoundFx.isPlaying)
-        user.audio.walkSoundFx.stop(); */
   }
 };
 

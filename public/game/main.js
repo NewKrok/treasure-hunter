@@ -28,12 +28,13 @@ import {
   getBullets,
 } from "./src/user/bullet-manager.js";
 
-import { getAudio, getTexture, preload } from "./game-engine/assets/assets.js";
+import { getTexture, preload } from "./game-engine/assets/assets.js";
 import {
   assetConfig,
   TextureId,
   AnimationId,
   AudioId,
+  audioConfig,
 } from "./assets-config.js";
 import { teamLevels } from "./level-config.js";
 import { loadAnimations } from "./game-engine/assets/animation-preloader.js";
@@ -60,6 +61,7 @@ import {
   updateTPSCameraRotation,
 } from "./game-engine/camera/camera.js";
 import {
+  addClimbableArea,
   setUnitControllerTarget,
   updateUnitController,
 } from "./src/control/unit-controller.js";
@@ -70,6 +72,7 @@ import {
 } from "./src/external-communicator.js";
 import { ParticleCollection } from "./src/effects/particle-system/particle-collection.js";
 import { Vector3 } from "./build/three.module.js";
+import { playAudio, setAudioConfig } from "./game-engine/audio/audio.js";
 
 const USE_DEBUG_RENDERER = false;
 let debugRenderer = null;
@@ -90,7 +93,6 @@ let canvas;
 let light;
 let controls;
 let spawnPoints = [];
-let climbableAreas = [];
 let climbUpBlockers = [];
 let climbLeftBlockers = [];
 let climbRightBlockers = [];
@@ -282,7 +284,7 @@ const loadLevel = (onLoaded) => {
             } else if (child.name.includes("Climb")) {
               //child.visible = false;
               child.geometry.computeBoundingBox();
-              climbableAreas.push({
+              addClimbableArea({
                 area: {
                   ...child.geometry.boundingBox,
                   ...child.position,
@@ -576,11 +578,11 @@ const animate = () => {
         users[0].physics.position.set(
           users[0].physics.position.x +
             (users[0].climbingUpDirection === 90
-              ? -0.5
+              ? 0.2
               : users[0].climbingUpDirection === -90
-              ? 0.5
+              ? -0.5
               : 0),
-          users[0].physics.position.y + 1.6,
+          users[0].physics.position.y + 1.7,
           users[0].physics.position.z +
             (users[0].climbingUpDirection === 180
               ? -0.5
@@ -698,6 +700,7 @@ window.createWorld = ({
         initUserManager(physicsWorld);
         initThreeJS();
         createSkyBox();
+        setAudioConfig(audioConfig);
         loadLevel(() => {
           setCameraPosition(spawnPoints[0].position);
 
@@ -761,8 +764,10 @@ window.createWorld = ({
             });
           };
 
-          const backgroundMusic = getAudio(AudioId.GameBackground);
-          backgroundMusic.play();
+          playAudio({
+            audioId: AudioId.GameBackground,
+            cacheId: AudioId.GameBackground,
+          });
 
           Object.keys(enemies).forEach((key) => {
             runEnemyLogic(enemies[key]);

@@ -1,6 +1,7 @@
 import { AudioId } from "../../assets-config.js";
 import { Raycaster, Vector3 } from "../../build/three.module.js";
-import { getAudio } from "../../game-engine/assets/assets.js";
+import { playAudio } from "../../game-engine/audio/audio.js";
+import { getCamera } from "../../game-engine/camera/camera.js";
 import { getBulletColliders, getColliders } from "../../main.js";
 import { ParticleCollection } from "../effects/particle-system/particle-collection.js";
 import { destroyParticleSystem } from "../effects/particle-system/particle-defaults.js";
@@ -58,9 +59,10 @@ export const shoot = ({ user, camera, scene }) => {
     bulletEffect,
   });
 
-  const pistolShotSoundFx = getAudio(AudioId.PistolShot);
-  if (pistolShotSoundFx.isPlaying) pistolShotSoundFx.stop();
-  pistolShotSoundFx.play();
+  playAudio({
+    audioId: AudioId.PistolShot,
+    cacheId: AudioId.PistolShot,
+  });
 };
 
 export const updateBullets = ({ scene }) => {
@@ -87,9 +89,14 @@ export const updateBullets = ({ scene }) => {
         const effect = ParticleCollection.createShootHitEffect(mesh.position);
         scene.add(effect);
 
-        const pistolHitSoundFx = getAudio(AudioId.PistolHit);
-        if (pistolHitSoundFx.isPlaying) pistolHitSoundFx.stop();
-        pistolHitSoundFx.play();
+        playAudio({
+          audioId: AudioId.PistolHit,
+          cacheId: AudioId.PistolHit,
+          position: intersects[0].point,
+          radius: 10,
+          scene,
+          camera: getCamera(),
+        });
 
         bulletsToRemove.push(mesh);
       }

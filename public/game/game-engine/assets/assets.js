@@ -16,9 +16,10 @@ const textures = {};
 export const registerTexture = ({ id, texture }) => (textures[id] = texture);
 export const getTexture = (id) => textures[id];
 
-const audioList = {};
-export const registerAudio = ({ id, audio }) => (audioList[id] = audio);
-export const getAudio = (id) => audioList[id];
+const audioBuffers = {};
+export const registerAudioBuffer = ({ id, audioBuffer }) =>
+  (audioBuffers[id] = audioBuffer);
+export const getAudioBuffer = (id) => audioBuffers[id];
 
 const materials = {};
 const createMaterial = ({ key, map }) => {
@@ -52,7 +53,7 @@ export const preload = ({ textures, fbxModels, audio }) =>
 
             loadAudio(audio)
               .then((loadedAudio) => {
-                loadedAudio.forEach((element) => registerAudio(element));
+                loadedAudio.forEach((element) => registerAudioBuffer(element));
                 console.log(`Audio files(${loadedAudio.length}) are loaded...`);
                 resolve();
               })

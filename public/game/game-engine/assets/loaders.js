@@ -73,15 +73,11 @@ export const loadTextures = (list) => {
 
 const loadAudioRoutine = ({ list, onElementLoaded, onComplete, onError }) => {
   if (list.length > 0) {
-    const { url, id, loop } = list[0];
+    const { url, id } = list[0];
     audioLoader.load(
       url,
-      (buffer) => {
-        const listener = new THREE.AudioListener();
-        const audio = new THREE.Audio(listener);
-        audio.setBuffer(buffer);
-        audio.setLoop(loop);
-        onElementLoaded({ id, audio });
+      (audioBuffer) => {
+        onElementLoaded({ id, audioBuffer });
         list.shift();
         loadAudioRoutine({ list, onElementLoaded, onComplete, onError });
       },

@@ -5,6 +5,8 @@ import { createCloudEffect } from "./cloud-effect.js";
 import { createShootEffect } from "./shoot-effect.js";
 import { createShootHitEffect } from "./shoot-hit-effect.js";
 import { createBulletEffect } from "./bullet-effect.js";
+import { createLandingEffect } from "./landing-effect.js";
+import { createStepEffect } from "./step-effect.js";
 
 export const ParticleCollection = {
   createChestIdleEffect,
@@ -14,4 +16,6 @@ export const ParticleCollection = {
   createShootEffect,
   createShootHitEffect,
   createBulletEffect,
+  createLandingEffect,
+  createStepEffect,
 };
