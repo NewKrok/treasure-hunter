@@ -3,11 +3,20 @@
 Web based 3D adventure game.
 
 # Screenshots
-![preview-1](https://user-images.githubusercontent.com/13141660/119280010-8a9d9500-bc2f-11eb-8813-12aa8dacb358.jpg)
-![preview-2](https://user-images.githubusercontent.com/13141660/119280012-8cffef00-bc2f-11eb-82fd-1f5965ef91ec.jpg)
-![preview-3](https://user-images.githubusercontent.com/13141660/119280015-8e311c00-bc2f-11eb-8f36-fb25c456e1a1.jpg)
+![image](https://user-images.githubusercontent.com/13141660/121426044-681bb380-c973-11eb-915c-6ac1011400f4.png)
+![image](https://user-images.githubusercontent.com/13141660/121426126-841f5500-c973-11eb-84c2-a1909db89a8a.png)
+![image](https://user-images.githubusercontent.com/13141660/121426373-cea0d180-c973-11eb-8f09-928dd3ebe300.png)
 
 # Preview Videos
+
+## 2021.06.06 https://youtu.be/fPFiIuNqhG4
+- Improved aim system
+- New particles effects for running and for jumping
+- Lava appearance improvements
+- Distance blur effect was added
+- Game music and sounds were added
+- Climbing system preparations
+
 ## 2021.05.24 https://www.youtube.com/watch?v=gZ7M_jUFNhU
 - Stamina system was added
 - Melee and ranged weapons preparations
