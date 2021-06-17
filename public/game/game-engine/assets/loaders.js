@@ -12,9 +12,9 @@ const loadFBXModelRoutine = ({
   onError,
 }) => {
   if (list.length > 0) {
-    const { url, id } = list[0];
+    const { url, id, textureId } = list[0];
     fbxLoader.load(url, (fbxModel) => {
-      onElementLoaded({ id, fbxModel });
+      onElementLoaded({ id, fbxModel, textureId });
       list.shift();
       loadFBXModelRoutine({ list, onElementLoaded, onComplete, onError });
     });

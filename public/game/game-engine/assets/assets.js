@@ -10,7 +10,7 @@ export const getAnimation = (key) => animations[key];
 const fbxModels = {};
 export const registerFBXModel = ({ id, fbxModel }) =>
   (fbxModels[id] = fbxModel);
-export const getFBXModel = (id) => fbxModels[id].clone();
+export const getFBXModel = (id) => THREE.SkeletonUtils.clone(fbxModels[id]);
 
 const textures = {};
 export const registerTexture = ({ id, texture }) => (textures[id] = texture);
@@ -48,7 +48,14 @@ export const preload = ({ textures, fbxModels, audio }) =>
 
         loadFBXModels(fbxModels)
           .then((loadedModels) => {
-            loadedModels.forEach((element) => registerFBXModel(element));
+            loadedModels.forEach((element) => {
+              element.fbxModel.traverse((child) => {
+                if (child.isMesh) {
+                  child.material.map = getTexture(element.textureId);
+                }
+              });
+              registerFBXModel(element);
+            });
             console.log(`FBX Models(${loadedModels.length}) are loaded...`);
 
             loadAudio(audio)

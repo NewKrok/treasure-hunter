@@ -73,6 +73,11 @@ import {
 import { ParticleCollection } from "./src/effects/particle-system/particle-collection.js";
 import { Vector3 } from "./build/three.module.js";
 import { playAudio, setAudioConfig } from "./game-engine/audio/audio.js";
+import { characterConfig, CharacterId } from "./character-config.js";
+import {
+  spawnCharacter,
+  updateCharacters,
+} from "./game-engine/character/character-manager.js";
 
 const USE_DEBUG_RENDERER = false;
 let debugRenderer = null;
@@ -152,11 +157,12 @@ const initThreeJS = () => {
   renderer.toneMapping = THREE.LinearToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.autoClear = false;
-  renderer.gammaOutput = true;
   renderer.gammaFactor = 2.2;
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(0x000000, 1);
+
+  THREE.WebGLRenderer.outputEncoding = true;
 
   /*outlineEffect = new THREE.OutlineEffect(renderer, {
     defaultThickness: 0.001,
@@ -170,21 +176,21 @@ const initThreeJS = () => {
   const bokehPass = new BokehPass(scene, camera, {
     focus: 10.0,
     aperture: 0.0002,
-    maxblur: 0.01,
+    maxblur: 0.005,
 
     width: window.innerWidth,
     height: window.innerHeight,
   });
   bokehPass.materialDepth.skinning = true;
 
-  outlinePass = new OutlinePass(
+  /*outlinePass = new OutlinePass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
     scene,
     camera,
     []
   );
   outlinePass.depthMaterial.skinning = true;
-  outlinePass.prepareMaskMaterial.skinning = true;
+  outlinePass.prepareMaskMaterial.skinning = true;*/
 
   const composer = new EffectComposer(renderer);
 
@@ -282,7 +288,7 @@ const loadLevel = (onLoaded) => {
                 ...child.position,
               });
             } else if (child.name.includes("Climb")) {
-              //child.visible = false;
+              child.visible = false;
               child.geometry.computeBoundingBox();
               addClimbableArea({
                 area: {
@@ -312,6 +318,21 @@ const loadLevel = (onLoaded) => {
             } else if (child.name.includes("Camera-Blocker")) {
               child.visible = false;
               registerCameraCollider(child);
+            } else if (
+              child.name.includes("Enemy") &&
+              child.userData.type === "skeleton"
+            ) {
+              // TODO collect unnecessary items and remove them from the world
+              child.visible = false;
+              spawnCharacter({
+                position: child.position,
+                rotation: Math.random() * (Math.PI * 2),
+                config: characterConfig[CharacterId.Skeleton],
+                onComplete: () => {
+                  console.log("SKELETON DONE");
+                },
+                scene,
+              });
             } else if (child.name.includes("Enemy")) {
               const rawData = child.name.split("|");
               const key = rawData[0];
@@ -609,6 +630,7 @@ const animate = () => {
     stats.update();
   }
 
+  updateCharacters(delta);
   updateUsers(delta);
   syncOwnUser({ serverCall: _serverCall, controls });
   syncOwnBullet({
@@ -694,6 +716,12 @@ window.createWorld = ({
       [AnimationId.CHANGE_WEAPON]:
         "./game/game-assets/3d/animations/change-weapon.fbx",
       [AnimationId.AIM]: "./game/game-assets/3d/animations/idle-pistol.fbx",
+      [AnimationId.SKELETON_IDLE]:
+        "./game/game-assets/3d/animations/skeleton-idle.fbx",
+      [AnimationId.SKELETON_WALK]:
+        "./game/game-assets/3d/animations/skeleton-walk.fbx",
+      [AnimationId.SKELETON_RUN]:
+        "./game/game-assets/3d/animations/skeleton-run.fbx",
     }).then(
       () => {
         physicsWorld = createPhysicsWorld();

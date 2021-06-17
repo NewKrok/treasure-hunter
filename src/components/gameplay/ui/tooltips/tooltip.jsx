@@ -11,7 +11,6 @@ const createTooltip = (id) => {
   switch (id) {
     case TooltipId.INTERACTION:
       return <InteractionTooltip />;
-      break;
 
     default:
       return "unhandled tooltip type";

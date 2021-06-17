@@ -26,27 +26,30 @@ export const AnimationId = {
   SHOOTING_PISTOL: "ANIMATION.SHOOTING_PISTOL",
   CHANGE_WEAPON: "ANIMATION.CHANGE_WEAPON",
   AIM: "ANIMATION.AIM",
+  SKELETON_IDLE: "ANIMATION.SKELETON_IDLE",
 };
 
 export const TextureId = {
-  AdventurerTexture: "adventurer-texture",
-  SkyBox1: "sky-box-1",
-  SkyBox2: "sky-box-2",
-  SkyBox3: "sky-box-3",
-  SkyBox4: "sky-box-4",
-  SkyBox5: "sky-box-5",
-  SkyBox6: "sky-box-6",
-  Particle: "particle",
-  Trail: "trail",
-  Smoke: "smoke",
-  SmokeBig: "smoke-big",
-  Noise1: "noise-1",
+  AdventurerTexture: "AdventurerTexture",
+  SkyBox1: "SkyBox1",
+  SkyBox2: "SkyBox2",
+  SkyBox3: "SkyBox3",
+  SkyBox4: "SkyBox4",
+  SkyBox5: "SkyBox5",
+  SkyBox6: "SkyBox6",
+  Particle: "Particle",
+  Trail: "Trail",
+  Smoke: "Smoke",
+  SmokeBig: "SmokeBig",
+  Noise1: "Noise1",
 };
 
 export const FBXModelId = {
-  Hat1: "hat-1",
-  Machete: "machete",
-  Pistol: "pistol",
+  CharacterAdventurer: "CharacterAdventurer",
+  CharacterSkeleton: "CharacterSkeleton",
+  Hat1: "Hat1",
+  Machete: "Machete",
+  Pistol: "Pistol",
 };
 
 export const AudioId = {
@@ -70,112 +73,129 @@ export const MaterialId = {
 export const assetConfig = {
   textures: [
     {
-      url: "./game/game-assets/3d/characters/adventurers-texture.png",
       id: TextureId.AdventurerTexture,
+      url: "./game/game-assets/3d/characters/adventurers-texture.png",
     },
     {
-      url: "./game/game-assets/textures/skybox/sb_1.jpg",
+      id: TextureId.DungeonsTexture01A,
+      url: "./game/game-assets/textures/model-textures/dungeons_2_texture_01_a.jpg",
+    },
+    {
       id: TextureId.SkyBox1,
+      url: "./game/game-assets/textures/skybox/sb_1.jpg",
     },
     {
-      url: "./game/game-assets/textures/skybox/sb_2.jpg",
       id: TextureId.SkyBox2,
+      url: "./game/game-assets/textures/skybox/sb_2.jpg",
     },
     {
-      url: "./game/game-assets/textures/skybox/sb_3.jpg",
       id: TextureId.SkyBox3,
+      url: "./game/game-assets/textures/skybox/sb_3.jpg",
     },
     {
-      url: "./game/game-assets/textures/skybox/sb_4.jpg",
       id: TextureId.SkyBox4,
+      url: "./game/game-assets/textures/skybox/sb_4.jpg",
     },
     {
-      url: "./game/game-assets/textures/skybox/sb_5.jpg",
       id: TextureId.SkyBox5,
+      url: "./game/game-assets/textures/skybox/sb_5.jpg",
     },
     {
-      url: "./game/game-assets/textures/skybox/sb_6.jpg",
       id: TextureId.SkyBox6,
+      url: "./game/game-assets/textures/skybox/sb_6.jpg",
     },
     {
-      url: "./game/game-assets/textures/effects/particle.jpg",
       id: TextureId.Particle,
+      url: "./game/game-assets/textures/effects/particle.jpg",
     },
     {
-      url: "./game/game-assets/textures/effects/trail-55.png",
       id: TextureId.Trail,
+      url: "./game/game-assets/textures/effects/trail-55.png",
     },
     {
-      url: "./game/game-assets/textures/effects/smoke.jpg",
       id: TextureId.Smoke,
+      url: "./game/game-assets/textures/effects/smoke.jpg",
     },
     {
-      url: "./game/game-assets/textures/effects/smoke-big.jpg",
       id: TextureId.SmokeBig,
+      url: "./game/game-assets/textures/effects/smoke-big.jpg",
     },
     {
-      url: "./game/game-assets/textures/effects/noise-1.jpg",
       id: TextureId.Noise1,
+      url: "./game/game-assets/textures/effects/noise-1.jpg",
     },
   ],
   fbxModels: [
     {
-      url: "./game/game-assets/3d/items/hat-1.fbx",
       id: FBXModelId.Hat1,
+      url: "./game/game-assets/3d/items/hat-1.fbx",
+      textureId: TextureId.AdventurerTexture,
     },
     {
-      url: "./game/game-assets/3d/items/machete.fbx",
       id: FBXModelId.Machete,
+      url: "./game/game-assets/3d/items/machete.fbx",
+      textureId: TextureId.AdventurerTexture,
     },
     {
-      url: "./game/game-assets/3d/items/pistol.fbx",
       id: FBXModelId.Pistol,
+      url: "./game/game-assets/3d/items/pistol.fbx",
+      textureId: TextureId.AdventurerTexture,
+    },
+    {
+      id: FBXModelId.CharacterAdventurer,
+      url: "./game/game-assets/3d/characters/adventurer-1.fbx",
+      textureId: TextureId.AdventurerTexture,
+    },
+    {
+      id: FBXModelId.CharacterSkeleton,
+      url: "./game/game-assets/3d/characters/skeleton-a.fbx",
+      textureId: TextureId.DungeonsTexture01A,
     },
   ],
   audio: [
     {
-      url: "./game/game-assets/audio/music/final-storm.ogg",
       id: AudioId.GameBackground,
+      url: "./game/game-assets/audio/music/final-storm.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/jump-5.ogg",
       id: AudioId.Landing,
+      url: "./game/game-assets/audio/fx/jump-5.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/male-jump-3.ogg",
       id: AudioId.Jump,
+      url: "./game/game-assets/audio/fx/male-jump-3.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/concrete-7.ogg",
       id: AudioId.PistolHit,
+      url: "./game/game-assets/audio/fx/concrete-7.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/revolver-shot-03.ogg",
       id: AudioId.PistolShot,
+      url: "./game/game-assets/audio/fx/revolver-shot-03.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/stone-footstep-8.ogg",
       id: AudioId.FootStep,
+      url: "./game/game-assets/audio/fx/stone-footstep-8.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/switch-sounds-19.ogg",
       id: AudioId.Switch,
+      url: "./game/game-assets/audio/fx/switch-sounds-19.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/cloth-item-ripped-2.ogg",
       id: AudioId.Aim,
+      url: "./game/game-assets/audio/fx/cloth-item-ripped-2.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/weapon-swap-3.ogg",
       id: AudioId.ChangeToPistol,
+      url: "./game/game-assets/audio/fx/weapon-swap-3.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/sword-woosh-2.ogg",
       id: AudioId.ChangeToMachete,
+      url: "./game/game-assets/audio/fx/sword-woosh-2.ogg",
     },
     {
-      url: "./game/game-assets/audio/fx/sword-woosh-10.ogg",
       id: AudioId.MacheteAttack,
+      url: "./game/game-assets/audio/fx/sword-woosh-10.ogg",
     },
   ],
 };

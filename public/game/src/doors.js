@@ -1,4 +1,4 @@
-import { Vector3 } from "../build/three.module.js";
+import { Vector3, Box3 } from "../build/three.module.js";
 
 import { AudioId, MaterialId } from "../assets-config.js";
 import { getMaterial } from "../game-engine/assets/assets.js";
@@ -97,7 +97,9 @@ export const registerDoorElement = ({ element, physicsWorld }) => {
       object: element,
       material: groundContactMaterial,
     });
-    var elementSize = new THREE.Box3().setFromObject(element).getSize();
+    const elementSize = new Box3()
+      .setFromObject(element)
+      .getSize(new Vector3());
     physicsWorld.add(collider);
     registerCameraCollider(element);
 

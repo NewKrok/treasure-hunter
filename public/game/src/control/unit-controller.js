@@ -488,8 +488,19 @@ export const updateUnitController = ({ now, delta }) => {
           new CANNON.Vec3(0, 1, 0),
           (hangingInfo.direction * Math.PI) / 180
         );
-        physics.position.x = hangingInfo.area.x;
-        physics.position.y = hangingInfo.area.y - 1.4;
+
+        switch (hangingInfo.direction) {
+          case 90:
+            physics.position.x = hangingInfo.area.x;
+            physics.position.y = hangingInfo.area.y - 1.4;
+            break;
+
+          case 180:
+            //physics.position.z = hangingInfo.area.z + 0.5;
+            break;
+
+          default:
+        }
       }
     }
   }
