@@ -1,5 +1,5 @@
-import { AnimationId } from "../../assets-config.js";
 import { createCharacter } from "./base-character.js";
+import { updateCharacterAnimation } from "./character-animation.js";
 
 const characters = [];
 
@@ -16,79 +16,95 @@ export const spawnCharacter = (props) => {
 export const updateCharacters = (delta) => {
   const now = Date.now();
   characters.forEach((user) => {
+    if (!user.command) {
+      user.command = { to: { x: 0, z: 0 } };
+      user.viewRotation = 0;
+    }
+
+    let targetRotation = user.targetRotation;
+    if (user.physics && targetRotation) {
+      let newViewRotation = user.viewRotation;
+      if (newViewRotation < 0) newViewRotation += Math.PI * 2;
+      let diff = targetRotation - newViewRotation;
+
+      while (Math.abs(diff) > Math.PI) {
+        if (targetRotation < newViewRotation) {
+          if (targetRotation === 0) targetRotation = Math.PI * 2;
+          else targetRotation += Math.PI * 2;
+
+          if (targetRotation >= Math.PI * 4) {
+            targetRotation -= Math.PI * 4;
+            newViewRotation -= Math.PI * 4;
+          }
+        } else {
+          newViewRotation += Math.PI * 2;
+        }
+        diff = targetRotation - newViewRotation;
+      }
+      user.viewRotation += diff * (delta / 0.2);
+
+      user.physics.quaternion.setFromAxisAngle(
+        new CANNON.Vec3(0, 1, 0),
+        -user.viewRotation
+      );
+    }
+
+    if (!user.lastCommandTime || now - user.lastCommandTime > 5000) {
+      if (!user.lastCommandTime) {
+        user.lastCommandTime = now;
+      } else {
+        user.lastCommandTime = now;
+        user.command = {
+          type: "move",
+          to: {
+            x: user.physics.position.x + Math.random() * 10 - 5,
+            z: user.physics.position.z + Math.random() * 10 - 5,
+          },
+        };
+        user.targetRotation =
+          Math.atan2(
+            user.physics.position.z - user.command.to.z,
+            user.physics.position.x - user.command.to.x
+          ) +
+          Math.PI / 2;
+        user.velocity = 2;
+        const tweenValue = {
+          x: user.physics.position.x,
+          z: user.physics.position.z,
+        };
+
+        let distanceX = user.command.to.x - user.physics.position.x;
+        let distanceY = user.command.to.z - user.physics.position.z;
+        let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+
+        gsap.to(tweenValue, {
+          x: user.command.to.x,
+          z: user.command.to.z,
+          duration: distance / user.velocity,
+          ease: "linear",
+          onUpdate: () => {
+            user.physics.position.vadd(
+              new THREE.Vector3(
+                tweenValue.x - user.physics.position.x,
+                0,
+                tweenValue.z - user.physics.position.z
+              ),
+              user.physics.position
+            );
+          },
+          onComplete: () => {
+            user.velocity = 0;
+          },
+        });
+      }
+    }
     user.updatePositions();
 
-    if (user.mixer) {
-      const { isStanding } = user;
-      /* setAnimationAction({
-        user,
-        animation: AnimationId.SKELETON_IDLE,
-        transitionTime: now - user.climbEndTime < 500 ? 0 : 0.15,
-        loop:
-          (!user.isWeaponChangeTriggered || user.velocity > 0 || user.useAim) &&
-          !user.isClimbingUp &&
-          !user.isDead &&
-          now - user.climbEndTime > 300,
-      });*/
-      user.mixer.update(delta);
-      /*user.updateLookAtRotation(
-        user.useAim ? getTPSCameraRotation() : { y: Math.PI / 2 }
-      );
-      if (user.isJumpTriggered && !user.wasJumpTriggered) {
-        user.jumpStartTime = now;
-        user.wasJumpTriggered = true;
-      }
-      if (user.isSlashTriggered && !user.wasSlashTriggered) {
-        user.slashStartTime = now;
-        user.wasSlashTriggered = true;
-      }
-      if (user.isShootTriggered && !user.wasShootTriggered) {
-        user.shootStartTime = now;
-        user.wasShootTriggered = true;
-      }
-      if (user.isWeaponChangeTriggered && !user.wasWeaponChangeTriggered) {
-        user.weaponChangeStartTime = now;
-        user.wasWeaponChangeTriggered = true;
-      }
-      if (isStanding && !user.wasLanded) {
-        user.wasLanded = true;
-        user.landingStartTime = now;
-        user.wasJumpTriggered = false;
+    updateCharacterAnimation({ delta, now, user });
 
-        playAudio({ audioId: AudioId.Landing, cacheId: AudioId.Landing });
-
-        const effect = ParticleCollection.createLandingEffect(
-          user.object.position
-        );
-        user.object.parent.add(effect);
-        setTimeout(() => destroyParticleSystem(effect), 1000);
-      }
-      if (!isStanding) user.wasLanded = false;*/
-    }
     if (user.isHanging) {
       user.physics.velocity.set(0, 0, 0);
       user.physics.mass = 0;
     } else user.physics.mass = 5;
   });
-};
-
-const setAnimationAction = ({
-  user,
-  animation,
-  transitionTime = 0.2,
-  loop = true,
-}) => {
-  if (animation !== user.activeAnimation) {
-    user.activeAnimation = animation;
-    user.lastAction = user.activeAction;
-    user.activeAction = user.animations[animation];
-    if (user.lastAction) user.lastAction.fadeOut(transitionTime);
-    user.activeAction.reset();
-    user.activeAction.fadeIn(transitionTime);
-    if (!loop) {
-      user.activeAction.setLoop(THREE.LoopOnce);
-      user.activeAction.clampWhenFinished = true;
-    }
-    user.activeAction.play();
-  }
 };

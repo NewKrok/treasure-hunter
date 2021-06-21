@@ -51,6 +51,7 @@ export const preload = ({ textures, fbxModels, audio }) =>
             loadedModels.forEach((element) => {
               element.fbxModel.traverse((child) => {
                 if (child.isMesh) {
+                  child.castShadow = true;
                   child.material.map = getTexture(element.textureId);
                 }
               });

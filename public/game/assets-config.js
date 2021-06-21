@@ -31,6 +31,7 @@ export const AnimationId = {
 
 export const TextureId = {
   AdventurerTexture: "AdventurerTexture",
+  DungeonsTexture01A: "DungeonsTexture01A",
   SkyBox1: "SkyBox1",
   SkyBox2: "SkyBox2",
   SkyBox3: "SkyBox3",
@@ -50,6 +51,7 @@ export const FBXModelId = {
   Hat1: "Hat1",
   Machete: "Machete",
   Pistol: "Pistol",
+  SwordMedium07: "SwordMedium07",
 };
 
 export const AudioId = {
@@ -149,6 +151,11 @@ export const assetConfig = {
     {
       id: FBXModelId.CharacterSkeleton,
       url: "./game/game-assets/3d/characters/skeleton-a.fbx",
+      textureId: TextureId.DungeonsTexture01A,
+    },
+    {
+      id: FBXModelId.SwordMedium07,
+      url: "./game/game-assets/3d/items/sm_wep_sword_medium_07.fbx",
       textureId: TextureId.DungeonsTexture01A,
     },
   ],

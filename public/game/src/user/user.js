@@ -5,8 +5,12 @@ import {
   getTexture,
 } from "../../game-engine/assets/assets.js";
 import { AnimationId, FBXModelId, TextureId } from "../../assets-config.js";
-import { characterContactMaterial } from "../physics/physics.js";
+import {
+  characterContactMaterial,
+  getPhysicsWorld,
+} from "../physics/physics.js";
 import { CharacterPosition } from "../../game-engine/character/base-character.js";
+import { staticConfig } from "../../static-config.js";
 
 export const create = ({
   id,
@@ -16,7 +20,6 @@ export const create = ({
   isOwn,
   scene,
   onComplete,
-  useDebugRender,
 }) => {
   console.log(`Create user for ${id}`);
   let body = null;
@@ -119,7 +122,7 @@ export const create = ({
   characterPositions[CharacterPosition.Hips].add(attachedPistol);
   characterPositions[CharacterPosition.Hips].attach(attachedPistol);
 
-  if (useDebugRender) {
+  if (staticConfig.useDebugRenderer) {
     const helper = new THREE.SkeletonHelper(object);
     scene.add(helper);
   }
@@ -180,6 +183,7 @@ export const create = ({
   body.linearDamping = 0.9;
   body.fixedRotation = true;
   body.updateMassProperties();
+  window.requestAnimationFrame(() => getPhysicsWorld().add(body));
 
   const resetAssetVisibilities = () => {
     attachedPistol.visible = true;
@@ -258,7 +262,6 @@ export const create = ({
         );
       },
       updateLookAtRotation: (rotation) => {
-        // if (Math.random() > 0.99) console.log(rotation.x);
         if (characterPositions[CharacterPosition.Spine])
           characterPositions[CharacterPosition.Spine].rotation.x =
             rotation.y - Math.PI / 2;

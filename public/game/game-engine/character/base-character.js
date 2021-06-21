@@ -1,8 +1,11 @@
-import { AnimationMixer } from "../../build/three.module.js";
+import { AnimationMixer, Vector3 } from "../../build/three.module.js";
 import { getAnimation, getFBXModel } from "../assets/assets.js";
-import { AnimationId } from "../../assets-config.js";
-import { characterContactMaterial } from "../../src/physics/physics.js";
+import {
+  characterContactMaterial,
+  getPhysicsWorld,
+} from "../../src/physics/physics.js";
 import { getUniqueNumber } from "../utils/token.js";
+import { staticConfig } from "../../static-config.js";
 
 export const CharacterPosition = {
   HeadEnd: "HeadEnd",
@@ -19,17 +22,17 @@ export const createCharacter = ({
   config,
 }) => {
   const id = getUniqueNumber();
+  const characterSockets = {};
+  const animations = [];
 
   let body = null;
-  let activeAction = null;
-
-  const animations = [];
 
   const model = getFBXModel(config.model);
   model.scale.set(config.scale, config.scale, config.scale);
   model.position.set(position.x, position.y, position.z);
-
   scene.add(model);
+
+  if (staticConfig.useDebugRenderer) scene.add(new THREE.SkeletonHelper(model));
 
   const mixer = new AnimationMixer(model);
 
@@ -38,21 +41,51 @@ export const createCharacter = ({
     const animClip = mixer.clipAction(anim);
     animations[key] = animClip;
   };
+  Object.keys(config.animations).forEach((key) =>
+    addAnimation(config.animations[key])
+  );
 
-  addAnimation(AnimationId.SKELETON_IDLE);
-  addAnimation(AnimationId.SKELETON_WALK);
-  addAnimation(AnimationId.SKELETON_RUN);
+  model.traverse((child) => {
+    switch (child.name) {
+      case "Head_end":
+      case "mixamorigHeadTop_End":
+        characterSockets[CharacterPosition.HeadEnd] = child;
+        break;
 
-  activeAction = animations[AnimationId.SKELETON_IDLE];
-  activeAction.reset();
-  activeAction.play();
-  scene.add(model);
+      case "Hand_R":
+      case "mixamorigRightHand":
+        characterSockets[CharacterPosition.HandRight] = child;
+        break;
 
-  const mass = 5;
-  const radius = 0.3;
-  const shape = new CANNON.Sphere(radius);
+      case "Hips":
+      case "mixamorigHips":
+        characterSockets[CharacterPosition.Hips] = child;
+        break;
+
+      case "Spine_01":
+      case "mixamorigSpine1":
+        characterSockets[CharacterPosition.Spine] = child;
+        break;
+
+      default:
+    }
+  });
+
+  config.attachments.forEach((attachment) => {
+    const model = getFBXModel(attachment.model);
+    model.scale.set(attachment.scale, attachment.scale, attachment.scale);
+    model.position.copy(attachment.offset);
+    model.rotation.x = attachment.rotation.x;
+    model.rotation.y = attachment.rotation.y;
+    model.rotation.z = attachment.rotation.z;
+
+    characterSockets[attachment.target].add(model);
+    characterSockets[attachment.target].attach(model);
+  });
+
+  const shape = new CANNON.Sphere(config.radius);
   body = new CANNON.Body({
-    mass: mass,
+    mass: config.mass,
     material: characterContactMaterial,
   });
   body.addShape(shape);
@@ -61,6 +94,7 @@ export const createCharacter = ({
   body.linearDamping = 0.9;
   body.fixedRotation = true;
   body.updateMassProperties();
+  window.requestAnimationFrame(() => getPhysicsWorld().add(body));
 
   if (onComplete)
     onComplete({
@@ -75,6 +109,7 @@ export const createCharacter = ({
         minZ: model.position.z - 0.1,
         maxZ: model.position.z + 0.1,
       }),
+      config,
       physics: body,
       mixer,
       isDead: false,
@@ -106,7 +141,7 @@ export const createCharacter = ({
       updatePositions: () => {
         model.position.set(
           body.position.x,
-          body.position.y - 0.3,
+          body.position.y - config.radius,
           body.position.z
         );
         model.quaternion.set(

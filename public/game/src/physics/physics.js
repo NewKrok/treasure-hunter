@@ -1,20 +1,23 @@
 export let groundContactMaterial = null;
 export let characterContactMaterial = null;
 
+let physicsWorld = null;
+export const getPhysicsWorld = () => physicsWorld;
+
 export const createPhysicsWorld = () => {
-  const world = new CANNON.World();
-  world.quatNormalizeSkip = 0;
-  world.quatNormalizeFast = false;
-  world.defaultContactMaterial.contactEquationStiffness = 1e9;
-  world.defaultContactMaterial.contactEquationRelaxation = 4;
+  physicsWorld = new CANNON.World();
+  physicsWorld.quatNormalizeSkip = 0;
+  physicsWorld.quatNormalizeFast = false;
+  physicsWorld.defaultContactMaterial.contactEquationStiffness = 1e9;
+  physicsWorld.defaultContactMaterial.contactEquationRelaxation = 4;
 
   const solver = new CANNON.GSSolver();
   solver.iterations = 7;
   solver.tolerance = 0.1;
-  world.solver = new CANNON.SplitSolver(solver);
+  physicsWorld.solver = new CANNON.SplitSolver(solver);
 
-  world.gravity.set(0, -20, 0);
-  world.broadphase = new CANNON.NaiveBroadphase();
+  physicsWorld.gravity.set(0, -20, 0);
+  physicsWorld.broadphase = new CANNON.NaiveBroadphase();
 
   var groundMaterial = new CANNON.Material("groundMaterial");
   groundContactMaterial = new CANNON.ContactMaterial(
@@ -29,7 +32,7 @@ export const createPhysicsWorld = () => {
       frictionEquationRegularizationTime: 3,
     }
   );
-  world.addContactMaterial(groundContactMaterial);
+  physicsWorld.addContactMaterial(groundContactMaterial);
 
   const physicsMaterial = new CANNON.Material("slipperyMaterial");
   characterContactMaterial = new CANNON.ContactMaterial(
@@ -42,7 +45,7 @@ export const createPhysicsWorld = () => {
       contactEquationRelaxation: 3,
     }
   );
-  world.addContactMaterial(characterContactMaterial);
+  physicsWorld.addContactMaterial(characterContactMaterial);
 
-  return world;
+  return physicsWorld;
 };

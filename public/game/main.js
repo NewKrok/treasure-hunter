@@ -78,8 +78,8 @@ import {
   spawnCharacter,
   updateCharacters,
 } from "./game-engine/character/character-manager.js";
+import { staticConfig } from "./static-config.js";
 
-const USE_DEBUG_RENDERER = false;
 let debugRenderer = null;
 
 export const STATE = {
@@ -206,9 +206,8 @@ const initThreeJS = () => {
   });
   scene.add(effect);
 
-  if (USE_DEBUG_RENDERER) {
+  if (staticConfig.useDebugRenderer)
     debugRenderer = new THREE.CannonDebugRenderer(scene, physicsWorld);
-  }
 };
 
 const createSkyBox = () => {
@@ -656,7 +655,7 @@ const animate = () => {
 
   updateCamera(delta);
 
-  if (USE_DEBUG_RENDERER) debugRenderer.update();
+  if (staticConfig.useDebugRenderer) debugRenderer.update();
 
   requestAnimationFrame(animate);
 };
@@ -734,7 +733,6 @@ window.createWorld = ({
 
           addUser({
             scene,
-            useDebugRender: USE_DEBUG_RENDERER,
             id: userId,
             name: userName,
             isOwn: true,
@@ -758,7 +756,6 @@ window.createWorld = ({
               console.log(`World is ready.`);
               onReady();
               createPlayers(players, () => {});
-              physicsWorld.add(user.physics);
             },
             sharedData,
           });
