@@ -13,11 +13,11 @@ export const spawnCharacter = (props) => {
   });
 };
 
-export const updateCharacters = (delta) => {
+export const updateCharacters = (delta, navMeshes) => {
   const now = Date.now();
   characters.forEach((user) => {
     if (!user.command) {
-      user.command = { to: { x: 0, z: 0 } };
+      user.command = { isSteppCompleted: true };
       user.viewRotation = 0;
     }
 
@@ -49,37 +49,72 @@ export const updateCharacters = (delta) => {
       );
     }
 
-    if (!user.lastCommandTime || now - user.lastCommandTime > 5000) {
-      if (!user.lastCommandTime) {
-        user.lastCommandTime = now;
-      } else {
-        user.lastCommandTime = now;
+    if (user.command.isSteppCompleted) {
+      if (!user.command.path)
         user.command = {
+          isSteppCompleted: false,
           type: "move",
-          to: {
-            x: user.physics.position.x + Math.random() * 10 - 5,
-            z: user.physics.position.z + Math.random() * 10 - 5,
-          },
+          path: [
+            "nav-mesh-2",
+            "nav-mesh-3",
+            "nav-mesh-4",
+            "nav-mesh-5",
+            "nav-mesh-6",
+            "nav-mesh-5",
+            "nav-mesh-4",
+            "nav-mesh-3",
+            "nav-mesh-2",
+            "nav-mesh-1",
+          ],
         };
-        user.targetRotation =
+      else {
+        user.command = {
+          isSteppCompleted: false,
+          type: "move",
+          path: user.command.path.slice(1),
+        };
+        if (user.command.path.length === 0) {
+          user.command.path = [
+            "nav-mesh-2",
+            "nav-mesh-3",
+            "nav-mesh-4",
+            "nav-mesh-5",
+            "nav-mesh-6",
+            "nav-mesh-5",
+            "nav-mesh-4",
+            "nav-mesh-3",
+            "nav-mesh-2",
+            "nav-mesh-1",
+          ];
+        }
+      }
+
+      const navMesh = navMeshes.find((n) => n.id === user.command.path[0]);
+
+      user.command.to = {
+        x: navMesh.x + Math.random() * 1 - 0.5,
+        z: navMesh.z + Math.random() * 1 - 0.5,
+      };
+
+      /*user.targetRotation =
           Math.atan2(
-            user.physics.position.z - user.command.to.z,
-            user.physics.position.x - user.command.to.x
+            user.physics.position.z - to.z,
+            user.physics.position.x - to.x
           ) +
-          Math.PI / 2;
-        user.velocity = 2;
-        const tweenValue = {
+          Math.PI / 2;*/
+      user.velocity = 2;
+      /*const tweenValue = {
           x: user.physics.position.x,
           z: user.physics.position.z,
-        };
+        };*/
 
-        let distanceX = user.command.to.x - user.physics.position.x;
-        let distanceY = user.command.to.z - user.physics.position.z;
-        let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+      // let distanceX = to.x - user.physics.position.x;
+      // let distanceY = to.z - user.physics.position.z;
+      // let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
-        gsap.to(tweenValue, {
-          x: user.command.to.x,
-          z: user.command.to.z,
+      /*gsap.to(tweenValue, {
+          x: to.x,
+          z: to.z,
           duration: distance / user.velocity,
           ease: "linear",
           onUpdate: () => {
@@ -95,9 +130,34 @@ export const updateCharacters = (delta) => {
           onComplete: () => {
             user.velocity = 0;
           },
-        });
+        });*/
+    } else if (user.command && user.command.to) {
+      user.targetRotation =
+        Math.atan2(
+          user.physics.position.z - user.command.to.z,
+          user.physics.position.x - user.command.to.x
+        ) +
+        Math.PI / 2;
+
+      user.physics.position.vadd(
+        new THREE.Vector3(
+          delta * 3 * Math.cos(user.targetRotation + Math.PI / 2),
+          0,
+          delta * 3 * Math.sin(user.targetRotation + Math.PI / 2)
+        ),
+        user.physics.position
+      );
+
+      if (!user.command.isSteppCompleted) {
+        let distanceX = user.command.to.x - user.physics.position.x;
+        let distanceY = user.command.to.z - user.physics.position.z;
+        let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+        if (distance < 0.5) {
+          user.command.isSteppCompleted = true;
+        }
       }
     }
+
     user.updatePositions();
 
     updateCharacterAnimation({ delta, now, user });

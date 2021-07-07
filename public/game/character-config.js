@@ -8,9 +8,9 @@ export const CharacterId = {
 export const characterConfig = {
   [CharacterId.Skeleton]: {
     model: FBXModelId.CharacterSkeleton,
-    scale: 0.01,
+    scale: 0.009,
     mass: 5,
-    radius: 0.8,
+    radius: 0.3,
     animations: {
       idle: AnimationId.SKELETON_IDLE,
       walk: AnimationId.SKELETON_WALK,

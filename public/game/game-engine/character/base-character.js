@@ -1,4 +1,4 @@
-import { AnimationMixer, Vector3 } from "../../build/three.module.js";
+import { AnimationMixer } from "../../build/three.module.js";
 import { getAnimation, getFBXModel } from "../assets/assets.js";
 import {
   characterContactMaterial,

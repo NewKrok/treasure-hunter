@@ -104,6 +104,7 @@ let climbRightBlockers = [];
 const enemies = {};
 const colliders = [];
 const bulletColliders = [];
+const navMeshes = [];
 
 export const getColliders = () => colliders;
 export const getBulletColliders = () => bulletColliders;
@@ -283,6 +284,15 @@ const loadLevel = (onLoaded) => {
               child.visible = false;
               child.geometry.computeBoundingBox();
               climbRightBlockers.push({
+                ...child.geometry.boundingBox,
+                ...child.position,
+              });
+            } else if (child.name.includes("nav-mesh")) {
+              child.visible = false;
+              child.geometry.computeBoundingBox();
+              navMeshes.push({
+                id: child.name,
+                linkReferences: child.userData.link.split(", "),
                 ...child.geometry.boundingBox,
                 ...child.position,
               });
@@ -629,7 +639,7 @@ const animate = () => {
     stats.update();
   }
 
-  updateCharacters(delta);
+  updateCharacters(delta, navMeshes);
   updateUsers(delta);
   syncOwnUser({ serverCall: _serverCall, controls });
   syncOwnBullet({
