@@ -60,6 +60,16 @@ export const updateCharacters = (delta, navMeshes) => {
             "nav-mesh-4",
             "nav-mesh-5",
             "nav-mesh-6",
+            "nav-mesh-7",
+            "nav-mesh-8",
+            "nav-mesh-9",
+            "nav-mesh-10",
+            "nav-mesh-11",
+            "nav-mesh-10",
+            "nav-mesh-9",
+            "nav-mesh-8",
+            "nav-mesh-7",
+            "nav-mesh-6",
             "nav-mesh-5",
             "nav-mesh-4",
             "nav-mesh-3",
@@ -79,6 +89,16 @@ export const updateCharacters = (delta, navMeshes) => {
             "nav-mesh-3",
             "nav-mesh-4",
             "nav-mesh-5",
+            "nav-mesh-6",
+            "nav-mesh-7",
+            "nav-mesh-8",
+            "nav-mesh-9",
+            "nav-mesh-10",
+            "nav-mesh-11",
+            "nav-mesh-10",
+            "nav-mesh-9",
+            "nav-mesh-8",
+            "nav-mesh-7",
             "nav-mesh-6",
             "nav-mesh-5",
             "nav-mesh-4",
@@ -102,7 +122,7 @@ export const updateCharacters = (delta, navMeshes) => {
             user.physics.position.x - to.x
           ) +
           Math.PI / 2;*/
-      user.velocity = 2;
+      user.velocity = 1;
       /*const tweenValue = {
           x: user.physics.position.x,
           z: user.physics.position.z,
@@ -131,7 +151,7 @@ export const updateCharacters = (delta, navMeshes) => {
             user.velocity = 0;
           },
         });*/
-    } else if (user.command && user.command.to) {
+    } else if (user.command && user.command.to && user.velocity != 0) {
       user.targetRotation =
         Math.atan2(
           user.physics.position.z - user.command.to.z,
@@ -141,9 +161,9 @@ export const updateCharacters = (delta, navMeshes) => {
 
       user.physics.position.vadd(
         new THREE.Vector3(
-          delta * 3 * Math.cos(user.targetRotation + Math.PI / 2),
+          delta * 1 * Math.cos(user.targetRotation + Math.PI / 2),
           0,
-          delta * 3 * Math.sin(user.targetRotation + Math.PI / 2)
+          delta * 1 * Math.sin(user.targetRotation + Math.PI / 2)
         ),
         user.physics.position
       );
@@ -153,7 +173,10 @@ export const updateCharacters = (delta, navMeshes) => {
         let distanceY = user.command.to.z - user.physics.position.z;
         let distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
         if (distance < 0.5) {
-          user.command.isSteppCompleted = true;
+          user.velocity = 0;
+          setTimeout(() => {
+            user.command.isSteppCompleted = true;
+          }, Math.random() * 1000);
         }
       }
     }

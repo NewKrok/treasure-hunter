@@ -37,7 +37,6 @@ import {
   audioConfig,
 } from "./assets-config.js";
 import { teamLevels } from "./level-config.js";
-import { loadAnimations } from "./game-engine/assets/animation-preloader.js";
 import { calculateBoundingBox, intersect } from "./src/utils/threejs-utils.js";
 import { createColliderByObject } from "./src/utils/cannon-utils.js";
 
@@ -337,9 +336,7 @@ const loadLevel = (onLoaded) => {
                 position: child.position,
                 rotation: Math.random() * (Math.PI * 2),
                 config: characterConfig[CharacterId.Skeleton],
-                onComplete: () => {
-                  console.log("SKELETON DONE");
-                },
+                onComplete: () => {},
                 scene,
               });
             } else if (child.name.includes("Enemy")) {
@@ -682,135 +679,85 @@ window.createWorld = ({
   _serverCall = serverCall;
   sharedData.state = STATE.WAITING_FOR_START;
 
-  preload(assetConfig).then(() =>
-    loadAnimations({
-      [AnimationId.WALK]: "./game/game-assets/3d/animations/walk.fbx",
-      [AnimationId.WALK_BACK]: "./game/game-assets/3d/animations/walk-back.fbx",
-      [AnimationId.WALK_BACK_PISTOL]:
-        "./game/game-assets/3d/animations/walk-back-pistol.fbx",
-      [AnimationId.WALK_CROUCH]:
-        "./game/game-assets/3d/animations/walk-crouch.fbx",
-      [AnimationId.WALK_PISTOL]:
-        "./game/game-assets/3d/animations/walk-pistol.fbx",
-      [AnimationId.PISTOL_STRAFE]:
-        "./game/game-assets/3d/animations/pistol-strafe.fbx",
-      [AnimationId.RUN]: "./game/game-assets/3d/animations/run.fbx",
-      [AnimationId.SPRINT]: "./game/game-assets/3d/animations/sprint.fbx",
-      [AnimationId.RUN_BACK]: "./game/game-assets/3d/animations/run-back.fbx",
-      [AnimationId.IDLE]: "./game/game-assets/3d/animations/idle.fbx",
-      [AnimationId.FALLING_IDLE]:
-        "./game/game-assets/3d/animations/falling-idle.fbx",
-      [AnimationId.FALLING_LANDING]:
-        "./game/game-assets/3d/animations/falling-landing.fbx",
-      [AnimationId.HANGING]: "./game/game-assets/3d/animations/hanging.fbx",
-      [AnimationId.SHIMMY_LEFT]:
-        "./game/game-assets/3d/animations/shimmy-left.fbx",
-      [AnimationId.SHIMMY_RIGHT]:
-        "./game/game-assets/3d/animations/shimmy-right.fbx",
-      [AnimationId.CLIMBING]: "./game/game-assets/3d/animations/climbing.fbx",
-      [AnimationId.STANDING]: "./game/game-assets/3d/animations/standing.fbx",
-      [AnimationId.VICTORY]: "./game/game-assets/3d/animations/victory.fbx",
-      [AnimationId.DIE]: "./game/game-assets/3d/animations/die.fbx",
-      [AnimationId.SIDLE_LEFT]:
-        "./game/game-assets/3d/animations/sidle-left.fbx",
-      [AnimationId.SIDLE_RIGHT]:
-        "./game/game-assets/3d/animations/sidle-right.fbx",
-      [AnimationId.DIE]: "./game/game-assets/3d/animations/die.fbx",
-      [AnimationId.TURN_LEFT]: "./game/game-assets/3d/animations/turn-left.fbx",
-      [AnimationId.TURN_RIGHT]:
-        "./game/game-assets/3d/animations/turn-right.fbx",
-      [AnimationId.SLASH]: "./game/game-assets/3d/animations/slash.fbx",
-      [AnimationId.SHOOTING_PISTOL]:
-        "./game/game-assets/3d/animations/shooting-pistol.fbx",
-      [AnimationId.CHANGE_WEAPON]:
-        "./game/game-assets/3d/animations/change-weapon.fbx",
-      [AnimationId.AIM]: "./game/game-assets/3d/animations/idle-pistol.fbx",
-      [AnimationId.SKELETON_IDLE]:
-        "./game/game-assets/3d/animations/skeleton-idle.fbx",
-      [AnimationId.SKELETON_WALK]:
-        "./game/game-assets/3d/animations/skeleton-walk.fbx",
-      [AnimationId.SKELETON_RUN]:
-        "./game/game-assets/3d/animations/skeleton-run.fbx",
-    }).then(
-      () => {
-        physicsWorld = createPhysicsWorld();
-        initUserManager(physicsWorld);
-        initThreeJS();
-        createSkyBox();
-        setAudioConfig(audioConfig);
-        loadLevel(() => {
-          setCameraPosition(spawnPoints[0].position);
+  preload(assetConfig).then(
+    () => {
+      physicsWorld = createPhysicsWorld();
+      initUserManager(physicsWorld);
+      initThreeJS();
+      createSkyBox();
+      setAudioConfig(audioConfig);
+      loadLevel(() => {
+        setCameraPosition(spawnPoints[0].position);
 
-          addUser({
-            scene,
-            id: userId,
-            name: userName,
-            isOwn: true,
-            position: {
-              x: spawnPoints[0].position.x,
-              y: spawnPoints[0].position.y,
-              z: spawnPoints[0].position.z,
-            },
-            rotation: spawnPoints[0].rotation,
-            onComplete: (user) => {
-              //outlinePass.selectedObjects = [user.object];
-              setCameraTarget(user.object);
-              setUnitControllerTarget({ target: user, physicsWorld });
-              onUnitAction({
-                action: UnitAction.Interaction,
-                callback: () => collectChest({ scene, physicsWorld }),
-              });
-              init();
-              animate();
-
-              console.log(`World is ready.`);
-              onReady();
-              createPlayers(players, () => {});
-            },
-            sharedData,
-          });
-
-          const runEnemyLogic = (enemy) => {
-            gsap.to(enemy.child.position, {
-              x: enemy.path[enemy.pathIndex].x,
-              y: enemy.path[enemy.pathIndex].y,
-              z: enemy.path[enemy.pathIndex].z,
-              duration:
-                (enemy.child.position.distanceTo(enemy.path[enemy.pathIndex]) /
-                  1) *
-                enemy.speed,
-              ease: "linear",
-              onComplete: () => {
-                enemy.pathIndex++;
-                if (enemy.pathIndex === enemy.path.length) enemy.pathIndex = 0;
-                runEnemyLogic(enemy);
-              },
+        addUser({
+          scene,
+          id: userId,
+          name: userName,
+          isOwn: true,
+          position: {
+            x: spawnPoints[0].position.x,
+            y: spawnPoints[0].position.y,
+            z: spawnPoints[0].position.z,
+          },
+          rotation: spawnPoints[0].rotation,
+          onComplete: (user) => {
+            //outlinePass.selectedObjects = [user.object];
+            setCameraTarget(user.object);
+            setUnitControllerTarget({ target: user, physicsWorld });
+            onUnitAction({
+              action: UnitAction.Interaction,
+              callback: () => collectChest({ scene, physicsWorld }),
             });
+            init();
+            animate();
 
-            const tweenValue = {
-              rotation: 0,
-            };
-            gsap.to(tweenValue, {
-              rotation: Math.PI,
-              duration: 0.5,
-              onUpdate: () => {
-                enemy.child.rotation.z = tweenValue.rotation;
-              },
-            });
-          };
-
-          playAudio({
-            audioId: AudioId.GameBackground,
-            cacheId: AudioId.GameBackground,
-          });
-
-          Object.keys(enemies).forEach((key) => {
-            runEnemyLogic(enemies[key]);
-          });
+            console.log(`World is ready.`);
+            onReady();
+            createPlayers(players, () => {});
+          },
+          sharedData,
         });
-      },
-      (error) => console.error("Failed!", error)
-    )
+
+        const runEnemyLogic = (enemy) => {
+          gsap.to(enemy.child.position, {
+            x: enemy.path[enemy.pathIndex].x,
+            y: enemy.path[enemy.pathIndex].y,
+            z: enemy.path[enemy.pathIndex].z,
+            duration:
+              (enemy.child.position.distanceTo(enemy.path[enemy.pathIndex]) /
+                1) *
+              enemy.speed,
+            ease: "linear",
+            onComplete: () => {
+              enemy.pathIndex++;
+              if (enemy.pathIndex === enemy.path.length) enemy.pathIndex = 0;
+              runEnemyLogic(enemy);
+            },
+          });
+
+          const tweenValue = {
+            rotation: 0,
+          };
+          gsap.to(tweenValue, {
+            rotation: Math.PI,
+            duration: 0.5,
+            onUpdate: () => {
+              enemy.child.rotation.z = tweenValue.rotation;
+            },
+          });
+        };
+
+        playAudio({
+          audioId: AudioId.GameBackground,
+          cacheId: AudioId.GameBackground,
+        });
+
+        Object.keys(enemies).forEach((key) => {
+          runEnemyLogic(enemies[key]);
+        });
+      });
+    },
+    (error) => console.error("Failed!", error)
   );
 };
 

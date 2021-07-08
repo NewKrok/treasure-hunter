@@ -1,6 +1,6 @@
 import { AnimationMixer, Object3D } from "../../build/three.module.js";
 import {
-  getAnimation,
+  getFBXAnimation,
   getFBXModel,
   getTexture,
 } from "../../game-engine/assets/assets.js";
@@ -132,7 +132,7 @@ export const create = ({
   const mixer = new AnimationMixer(object);
 
   const addAnimation = (key) => {
-    const anim = getAnimation(key);
+    const anim = getFBXAnimation(key);
     const animClip = mixer.clipAction(anim);
     animations[key] = animClip;
   };

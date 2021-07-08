@@ -15,6 +15,7 @@ export const characterConfig = {
       idle: AnimationId.SKELETON_IDLE,
       walk: AnimationId.SKELETON_WALK,
       run: AnimationId.SKELETON_RUN,
+      fallingLoop: AnimationId.SKELETON_FALLING_LOOP,
     },
     attachments: [
       {

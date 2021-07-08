@@ -1,5 +1,5 @@
 import { AnimationMixer } from "../../build/three.module.js";
-import { getAnimation, getFBXModel } from "../assets/assets.js";
+import { getFBXAnimation, getFBXModel } from "../assets/assets.js";
 import {
   characterContactMaterial,
   getPhysicsWorld,
@@ -37,7 +37,7 @@ export const createCharacter = ({
   const mixer = new AnimationMixer(model);
 
   const addAnimation = (key) => {
-    const anim = getAnimation(key);
+    const anim = getFBXAnimation(key);
     const animClip = mixer.clipAction(anim);
     animations[key] = animClip;
   };

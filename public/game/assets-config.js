@@ -27,6 +27,9 @@ export const AnimationId = {
   CHANGE_WEAPON: "ANIMATION.CHANGE_WEAPON",
   AIM: "ANIMATION.AIM",
   SKELETON_IDLE: "ANIMATION.SKELETON_IDLE",
+  SKELETON_WALK: "ANIMATION.SKELETON_WALK",
+  SKELETON_RUN: "ANIMATION.SKELETON_RUN",
+  SKELETON_FALLING_LOOP: "ANIMATION.SKELETON_FALLING_LOOP",
 };
 
 export const TextureId = {
@@ -157,6 +160,136 @@ export const assetConfig = {
       id: FBXModelId.SwordMedium07,
       url: "./game/game-assets/3d/items/sm_wep_sword_medium_07.fbx",
       textureId: TextureId.DungeonsTexture01A,
+    },
+  ],
+  fbxAnimations: [
+    {
+      id: AnimationId.WALK,
+      url: "./game/game-assets/3d/animations/walk.fbx",
+    },
+    {
+      id: AnimationId.WALK_BACK,
+      url: "./game/game-assets/3d/animations/walk-back.fbx",
+    },
+    {
+      id: AnimationId.WALK_BACK_PISTOL,
+      url: "./game/game-assets/3d/animations/walk-back-pistol.fbx",
+    },
+    {
+      id: AnimationId.WALK_CROUCH,
+      url: "./game/game-assets/3d/animations/walk-crouch.fbx",
+    },
+    {
+      id: AnimationId.WALK_PISTOL,
+      url: "./game/game-assets/3d/animations/walk-pistol.fbx",
+    },
+    {
+      id: AnimationId.PISTOL_STRAFE,
+      url: "./game/game-assets/3d/animations/pistol-strafe.fbx",
+    },
+    {
+      id: AnimationId.RUN,
+      url: "./game/game-assets/3d/animations/run.fbx",
+    },
+    {
+      id: AnimationId.SPRINT,
+      url: "./game/game-assets/3d/animations/sprint.fbx",
+    },
+    {
+      id: AnimationId.RUN_BACK,
+      url: "./game/game-assets/3d/animations/run-back.fbx",
+    },
+    {
+      id: AnimationId.IDLE,
+      url: "./game/game-assets/3d/animations/idle.fbx",
+    },
+    {
+      id: AnimationId.FALLING_IDLE,
+      url: "./game/game-assets/3d/animations/falling-idle.fbx",
+    },
+    {
+      id: AnimationId.FALLING_LANDING,
+      url: "./game/game-assets/3d/animations/falling-landing.fbx",
+    },
+    {
+      id: AnimationId.HANGING,
+      url: "./game/game-assets/3d/animations/hanging.fbx",
+    },
+    {
+      id: AnimationId.SHIMMY_LEFT,
+      url: "./game/game-assets/3d/animations/shimmy-left.fbx",
+    },
+    {
+      id: AnimationId.SHIMMY_RIGHT,
+      url: "./game/game-assets/3d/animations/shimmy-right.fbx",
+    },
+    {
+      id: AnimationId.CLIMBING,
+      url: "./game/game-assets/3d/animations/climbing.fbx",
+    },
+    {
+      id: AnimationId.STANDING,
+      url: "./game/game-assets/3d/animations/standing.fbx",
+    },
+    {
+      id: AnimationId.VICTORY,
+      url: "./game/game-assets/3d/animations/victory.fbx",
+    },
+    {
+      id: AnimationId.DIE,
+      url: "./game/game-assets/3d/animations/die.fbx",
+    },
+    {
+      id: AnimationId.SIDLE_LEFT,
+      url: "./game/game-assets/3d/animations/sidle-left.fbx",
+    },
+    {
+      id: AnimationId.SIDLE_RIGHT,
+      url: "./game/game-assets/3d/animations/sidle-right.fbx",
+    },
+    {
+      id: AnimationId.DIE,
+      url: "./game/game-assets/3d/animations/die.fbx",
+    },
+    {
+      id: AnimationId.TURN_LEFT,
+      url: "./game/game-assets/3d/animations/turn-left.fbx",
+    },
+    {
+      id: AnimationId.TURN_RIGHT,
+      url: "./game/game-assets/3d/animations/turn-right.fbx",
+    },
+    {
+      id: AnimationId.SLASH,
+      url: "./game/game-assets/3d/animations/slash.fbx",
+    },
+    {
+      id: AnimationId.SHOOTING_PISTOL,
+      url: "./game/game-assets/3d/animations/shooting-pistol.fbx",
+    },
+    {
+      id: AnimationId.CHANGE_WEAPON,
+      url: "./game/game-assets/3d/animations/change-weapon.fbx",
+    },
+    {
+      id: AnimationId.AIM,
+      url: "./game/game-assets/3d/animations/idle-pistol.fbx",
+    },
+    {
+      id: AnimationId.SKELETON_IDLE,
+      url: "./game/game-assets/3d/animations/skeleton-idle.fbx",
+    },
+    {
+      id: AnimationId.SKELETON_WALK,
+      url: "./game/game-assets/3d/animations/skeleton-walk.fbx",
+    },
+    {
+      id: AnimationId.SKELETON_RUN,
+      url: "./game/game-assets/3d/animations/skeleton-run.fbx",
+    },
+    {
+      id: AnimationId.SKELETON_FALLING_LOOP,
+      url: "./game/game-assets/3d/animations/skeleton-falling-loop.fbx",
     },
   ],
   audio: [
